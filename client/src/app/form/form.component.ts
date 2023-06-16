@@ -1,0 +1,95 @@
+import {Component, OnInit} from '@angular/core';
+import {UserService} from "../user.service";
+import {ActivatedRoute, Router} from "@angular/router";
+import {FormControl, Validators} from "@angular/forms";
+
+const REGEX_PASSW: RegExp = /^(=?.*[A-Z])(?=.*[0-9])[a-zA-Z0-9!?]{8,}$/;
+const REGEX_USERN: RegExp = /^[a-zA-Z0-9_]{3,}$/;
+const STR_NO_ERROR: string = 'no errors';
+
+@Component({
+  selector: 'app-form',
+  templateUrl: './form.component.html',
+  styleUrls: ['./form.component.css']
+})
+export class FormComponent implements OnInit {
+  isLogin: boolean = true;          // booleana che afferma se è in login o in registrazione
+  passwordHided: boolean = true;    // booleana che afferma se la password è visibile
+  onLoad: boolean = false;          // booleana che afferma se sta effettuando qualche azione
+
+  error: string = STR_NO_ERROR;     // stringa che indica l'errore da segnalare
+  noErrorAtSignUp: boolean = false; // booleana che afferma se c'è un errore da segnalare all'utente
+
+  // --- controlli sui campi di username, password ed email (tutti e tre sono required)
+  email: FormControl = new FormControl('', [Validators.required, Validators.email]);
+  password: FormControl = new FormControl('Francesc0', [Validators.required, Validators.pattern(REGEX_PASSW)]);
+  username: FormControl = new FormControl('cano', [Validators.required, Validators.pattern(REGEX_USERN)]);
+
+  constructor(public user: UserService, public router: Router) {
+    // --- specifico di voler utilizzare il servizio UserService e la classe Router in maniera globale
+  }
+
+  // --- pulisco i valori dell'utente
+  ngOnInit(): void {
+    this.user.username = undefined;
+    this.user.email = undefined;
+    this.user.password = undefined;
+    this.user.id = undefined;
+    this.user.fotoProfilo = undefined;
+  }
+
+  // --- metodo richiamato per accedere o registrarsi
+  send(): void {
+    this.error = STR_NO_ERROR;
+    this.noErrorAtSignUp = false;
+    this.onLoad = true;
+
+    setTimeout((): void => {
+      if (this.isLogin)
+        this.login();
+      else
+        this.signUp();
+    }, 1000);
+  }
+
+  // --- metodo per completare il login
+  login(): void {
+    this.user.login(this.username.getRawValue(), this.password.getRawValue())
+      .subscribe(res => {
+        this.onLoad = false;
+
+        if(!res.logged)
+          this.error = 'Le credenziali inserite non sono corrette';
+        else {
+          this.user.username = res.username;
+          this.user.password = res.password;
+          this.user.email = res.email;
+          this.user.id = res.id;
+
+          //this.router.navigate(['/user/prenota']).then();
+        }
+      })
+  }
+
+  // --- metodo per completare la registrazione
+  signUp(): void {
+    this.user.signUp(this.username.getRawValue(), this.email.getRawValue(), this.password.getRawValue())
+      .subscribe(res => {
+        this.onLoad = false;
+        if(res.error != undefined) {
+          this.error = res.error;
+          this.noErrorAtSignUp = false;
+        } else
+          this.noErrorAtSignUp = true;
+      });
+  }
+
+  // --- metodo per cambiare da login a sign up e viceversa
+  toggleLoginSignUp(): void {
+    this.error = STR_NO_ERROR;
+    this.noErrorAtSignUp = false;
+    this.isLogin = !this.isLogin;
+  }
+
+  protected readonly STR_NO_ERROR = STR_NO_ERROR;
+}

@@ -1,0 +1,50 @@
+<div id="container">
+  <mat-card id="form-container">
+    <mat-card-header>
+      <div mat-card-avatar class="logo-image"></div>
+      <mat-card-title>{{isLogin? 'Accedi': 'Registrati'}}</mat-card-title>
+      <mat-card-subtitle><strong></strong>Per i servizi di Tucano</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-divider></mat-divider>
+
+    <mat-card-content>
+      <ng-form>
+        <mat-form-field>
+          <mat-label>Username</mat-label>
+          <input matInput [disabled]="onLoad" [formControl]="username">
+          <mat-error *ngIf="username.hasError('pattern') && !username.hasError('required') && !isLogin">L'username deve essere lungo almeno 3 caratteri e può includere lettere, numeri e _</mat-error>
+          <mat-error *ngIf="username.hasError('required')">L'username è <strong>obbligatorio</strong></mat-error>
+        </mat-form-field>
+
+        <mat-form-field *ngIf="!isLogin">
+          <mat-label>Email</mat-label>
+          <input matInput type="text" [disabled]="onLoad" [formControl]="email">
+          <mat-error *ngIf="email.hasError('email') && !email.hasError('required')">Please enter a valid email address</mat-error>
+          <mat-error *ngIf="email.hasError('required')">L'email è <strong>obbligatoria</strong></mat-error>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Password</mat-label>
+          <input matInput [disabled]="onLoad" [formControl]="password" [type]="passwordHided? 'password' : 'text'">
+          <button mat-icon-button matSuffix (click)="passwordHided = !passwordHided" [attr.aria-pressed]="passwordHided">
+            <mat-icon>{{passwordHided ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+          <mat-error *ngIf="password.hasError('pattern') && !password.hasError('required') && !isLogin">Your password must has 8 or more characters, 1 or more number and 1 or more uppercase letter</mat-error>
+          <mat-error *ngIf="password.hasError('required')">La password è <strong>obbligatoria</strong></mat-error>
+        </mat-form-field>
+        <button id="send" mat-raised-button color="primary" [disabled]="onLoad || username.invalid || password.invalid || (!isLogin && email.invalid)" (click)="send()">{{isLogin? 'Accedi': 'Registrati'}}</button>
+      </ng-form>
+
+      <div id="error" class="end-message" *ngIf="error != STR_NO_ERROR"><mat-icon>error</mat-icon><p>{{error}}</p></div>
+      <div id="no-error" class="end-message" *ngIf="noErrorAtSignUp"><mat-icon>check</mat-icon><p>controlla le tue email e continua la registrazione</p></div>
+    </mat-card-content>
+
+    <mat-divider></mat-divider>
+
+    <mat-card-footer>
+      <button id="btn-change-form" [disabled]="onLoad" (click)="toggleLoginSignUp()">{{isLogin? 'Registrati': 'Accedi'}}<mat-icon>exit_to_app</mat-icon></button>
+      <mat-progress-bar mode="indeterminate" *ngIf="onLoad"></mat-progress-bar>
+    </mat-card-footer>
+  </mat-card>
+</div>
