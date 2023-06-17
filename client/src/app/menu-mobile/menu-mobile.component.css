@@ -1,0 +1,46 @@
+#container {
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+}
+
+mat-list-item {
+  margin: 10px 0;
+}
+
+mat-divider {
+  margin: 20px 0;
+  width: 100%;
+}
+
+#logout {
+  margin: 15px 20px;
+  padding: 10px;
+  width: calc(100% - 40px);
+}
+
+button mat-icon {
+  height: 30px;
+  width: 30px;
+  font-size: 30px;
+  color: #673ab7;
+  border-radius: 20px;
+}
+
+button {
+  font-size: 18px;
+  padding: 30px 10px;
+  width: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: left;
+}
+
+.unselected {
+  color: #673ab7;
+}
+
+.selected {
+  background-color: #ffd740;
+  color: #673ab7;
+}

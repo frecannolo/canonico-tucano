@@ -25,27 +25,28 @@ let connection = mysql.createConnection({
 connection.connect();
 
 let app = express();
-app.use(session({
-    secret: 'sonwgurbv',
-    resave: false,
-    saveUninitialized: false
-}));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.post('/login', function(req, res) {
+let router = express.Router();
+router.use(session({
+    secret: 'sonwgurbv',
+    resave: false,
+    saveUninitialized: false
+}));
+
+app.use('/', router);
+
+router.post('/login', function(req, res) {
     let { username, password } = req.body;
 
     connection.query(`SELECT * FROM user WHERE username='${username}' && password='${password}' && verified=1;`, function(err, data) {
        if(data.length === 1) {
-           req.session.inSessione = true;
+           req.session.idUser = data[0].id;
+
            res.json({
-               logged: true,
-               username: data.username,
-               password: data.password,
-               email: data.email,
-               id: data.id
+               logged: true
                // manca l'immagine
            });
        } else
@@ -53,7 +54,7 @@ app.post('/login', function(req, res) {
     });
 });
 
-app.post('/sign-up', function(req, res) {
+router.post('/sign-up', function(req, res) {
     let { username, email, password } = req.body;
 
     connection.query(`SELECT * FROM user WHERE username='${username}';`, function(err, data) {
@@ -98,7 +99,7 @@ app.post('/sign-up', function(req, res) {
     });
 });
 
-app.get('/checkCode', function(req, res) {
+router.get('/checkCode', function(req, res) {
     let code = req.query.code;
     let filename;
 
@@ -112,6 +113,25 @@ app.get('/checkCode', function(req, res) {
 
        res.sendFile(path.join(__dirname, 'public', 'htmls', filename + '.html'));
     });
+});
+
+router.get('/logged', function(req, res) {
+    res.json({ logged: req.session.idUser !== undefined });
+})
+
+router.get('/logout', function(req, res) {
+    if(req.session.idUser !== undefined)
+        req.session.destroy();
+    res.json({ });
+});
+
+router.get('/getUsername', function(req, res) {
+    if(req.session.idUser === undefined)
+        res.json({ });
+    else
+        connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
+            res.json({ username: data[0].username });
+        });
 });
 
 app.listen(PORT);

@@ -1,1 +1,18 @@
-<p>navbar works!</p>
+<mat-icon *ngIf="width < 700" id="icon-menu" (click)="openMenu()">menu</mat-icon>
+
+<div id="username">
+  <!--<mat-icon *ngIf="user.fotoProfilo == null || user.fotoProfilo == undefined">account_circle</mat-icon>
+  <img id="user-image" *ngIf="user.fotoProfilo != null && user.fotoProfilo != undefined" [src]="user.fotoProfilo">
+  <p id="p-username">{{user.username}}</p>-->
+  <mat-icon>account_circle</mat-icon>
+  <p id="p-username">{{username}}</p>
+</div>
+
+<div id="div-name" *ngIf="width >= 700">
+  <img id="logo" src="assets/logo.png">
+  <p>Tucano</p>
+</div>
+
+<div id="void" *ngIf="width < 700"></div>
+
+<p id="logout" (click)="user.logout()">Logout</p>

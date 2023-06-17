@@ -1,0 +1,41 @@
+app-navbar {
+  width: 100%;
+  height: 60px;
+  background-color: #673ab7;
+  color: #eaeaea;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#main {
+  height: calc(100% - 60px);
+}
+
+app-menu-fisso {
+  height: 100%;
+  width: 230px;
+  display: flex;
+  flex-direction: column;
+  background-color: #eaeaea;
+}
+
+mat-progress-bar {
+  position: absolute;
+  bottom: 0;
+  width: calc(100% - 230px);
+  left: 230px;
+}
+
+
+@media screen and (max-width: 700px) {
+  app-menu-fisso {
+    display: none;
+  }
+
+  mat-progress-bar {
+    width: 100%;
+    left: 0;
+  }
+}

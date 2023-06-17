@@ -6,18 +6,18 @@ import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
 import { FormComponent } from './form/form.component';
-import {MatCardModule} from "@angular/material/card";
-import {MatListModule} from "@angular/material/list";
+import {MatCardModule} from '@angular/material/card';
+import {MatListModule} from '@angular/material/list';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {MatButtonModule} from "@angular/material/button";
-import {MatInputModule} from "@angular/material/input";
-import {MatIconModule} from "@angular/material/icon";
-import {MatProgressBarModule} from "@angular/material/progress-bar";
+import {MatButtonModule} from '@angular/material/button';
+import {MatInputModule} from '@angular/material/input';
+import {MatIconModule} from '@angular/material/icon';
+import {MatProgressBarModule} from '@angular/material/progress-bar';
 import { HomeComponent } from './home/home.component';
 import { NavbarComponent } from './navbar/navbar.component';
 import { MenuFissoComponent } from './menu-fisso/menu-fisso.component';
-import { MenuMobileComponent } from './menu-mobile/menu-mobile.component';
 import { AccountPageComponent } from './account-page/account-page.component';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 
 @NgModule({
   declarations: [
@@ -26,7 +26,6 @@ import { AccountPageComponent } from './account-page/account-page.component';
     HomeComponent,
     NavbarComponent,
     MenuFissoComponent,
-    MenuMobileComponent,
     AccountPageComponent
   ],
   imports: [
@@ -41,7 +40,8 @@ import { AccountPageComponent } from './account-page/account-page.component';
     MatInputModule,
     MatIconModule,
     MatProgressBarModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatDialogModule
   ],
   providers: [],
   bootstrap: [AppComponent]

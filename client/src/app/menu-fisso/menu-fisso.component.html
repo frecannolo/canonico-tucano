@@ -1,1 +1,12 @@
-<p>menu-fisso works!</p>
+<div id="top-buttons">
+    <button mat-button color="primary" *ngFor="let btn of pages.getButtons()" [class]="btn.page == pages.page? 'selected': ''" (click)="this.pages.page = btn.page">
+      <mat-icon>{{btn.icon}}</mat-icon>
+      {{btn.text}}
+    </button>
+</div>
+
+<div id="void"></div>
+
+<div id="bottom-button">
+  <button mat-button color="primary" id="logout" (click)="logout()"><mat-icon>logout</mat-icon>logout</button>
+</div>

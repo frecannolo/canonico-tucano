@@ -1,20 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {Observable} from "rxjs";
+import {Router} from "@angular/router";
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  username: string | undefined;
-  password: string | undefined;
-  email: string | undefined;
-  fotoProfilo: string | ArrayBuffer | null | undefined;
-  id: number | undefined;
-
   logged: boolean = false;
 
-  constructor(public http: HttpClient) { }
+  constructor(public http: HttpClient, public router: Router) { }
 
   // --- effettua e ritorna la request post http per il login
   login(username: string, password: string): Observable<any> {
@@ -34,6 +29,17 @@ export class UserService {
   }
 
   logout(): void {
+    setTimeout(
+      () => this.http.get('/logout').subscribe(
+        () => this.router.navigate(['/'])),
+      1000);
+  }
 
+  getLogged(): Observable<any> {
+    return this.http.get('/logged');
+  }
+
+  getUsername(): Observable<any> {
+    return this.http.get('/getUsername');
   }
 }

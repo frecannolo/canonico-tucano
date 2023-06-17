@@ -1,1 +1,12 @@
-<p>menu-mobile works!</p>
+<div id="container">
+  <mat-list>
+    <mat-list-item *ngFor="let btn of pages.getButtons()">
+      <button mat-button [class]="btn.page == pages.page? 'selected': 'unselected'" (click)="close(btn.page)">
+        <mat-icon>{{btn.icon}}</mat-icon>
+        {{btn.text}}
+      </button>
+    </mat-list-item>
+  </mat-list>
+  <mat-divider></mat-divider>
+  <button mat-button id="logout" class="unselected" (click)="logout()"><mat-icon>logout</mat-icon>Logout</button>
+</div>

@@ -1,6 +1,6 @@
-import {Component, OnInit} from '@angular/core';
+import {Component} from '@angular/core';
 import {UserService} from "../user.service";
-import {ActivatedRoute, Router} from "@angular/router";
+import {Router} from "@angular/router";
 import {FormControl, Validators} from "@angular/forms";
 
 const REGEX_PASSW: RegExp = /^(=?.*[A-Z])(?=.*[0-9])[a-zA-Z0-9!?]{8,}$/;
@@ -12,7 +12,7 @@ const STR_NO_ERROR: string = 'no errors';
   templateUrl: './form.component.html',
   styleUrls: ['./form.component.css']
 })
-export class FormComponent implements OnInit {
+export class FormComponent {
   isLogin: boolean = true;          // booleana che afferma se è in login o in registrazione
   passwordHided: boolean = true;    // booleana che afferma se la password è visibile
   onLoad: boolean = false;          // booleana che afferma se sta effettuando qualche azione
@@ -27,15 +27,6 @@ export class FormComponent implements OnInit {
 
   constructor(public user: UserService, public router: Router) {
     // --- specifico di voler utilizzare il servizio UserService e la classe Router in maniera globale
-  }
-
-  // --- pulisco i valori dell'utente
-  ngOnInit(): void {
-    this.user.username = undefined;
-    this.user.email = undefined;
-    this.user.password = undefined;
-    this.user.id = undefined;
-    this.user.fotoProfilo = undefined;
   }
 
   // --- metodo richiamato per accedere o registrarsi
@@ -60,14 +51,8 @@ export class FormComponent implements OnInit {
 
         if(!res.logged)
           this.error = 'Le credenziali inserite non sono corrette';
-        else {
-          this.user.username = res.username;
-          this.user.password = res.password;
-          this.user.email = res.email;
-          this.user.id = res.id;
-
-          //this.router.navigate(['/user/prenota']).then();
-        }
+        else
+          this.router.navigate(['/home']);
       })
   }
 

@@ -67,7 +67,7 @@
               "browserTarget": "client:build:development"
             },
             "options": {
-              "browserTarget": "your-application-name:build",
+              "browserTarget": "client:build",
               "proxyConfig": "proxy.conf.json"
             }
           },
