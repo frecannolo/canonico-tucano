@@ -1,3 +1,13 @@
+let express = require('express');
+let path = require('path');
+let mysql = require('mysql');
+let mailer = require('nodemailer');
+let session = require('express-session');
+let bodyParser = require('body-parser');
+let fs = require('fs');
+let multiparty = require('connect-multiparty');
+let { exec } = require('child_process');
+
 const PORT = 3000;
 const URL = 'http://localhost:' + PORT;
 const NAME_DB = 'TUCANO_1';
@@ -7,14 +17,9 @@ const EMAIL = 'tucanomessages@gmail.com';
 const EMAIL_PASS = 'tgpqsrgctnbnjhzr';
 const CARACTS_CODE = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890';
 const LEN_CODE = 50;
+const PATH_UPLOADS = path.join('public', 'fotoProfilo');
 
-let express = require('express');
-let path = require('path');
-let mysql = require('mysql');
-let mailer = require('nodemailer');
-let session = require('express-session');
-let bodyParser = require('body-parser');
-let fs = require('fs');
+let multipart = multiparty({ uploadDir: PATH_UPLOADS });
 
 let connection = mysql.createConnection({
     host: 'localhost',
@@ -24,11 +29,6 @@ let connection = mysql.createConnection({
 });
 connection.connect();
 
-let app = express();
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public')));
-
 let router = express.Router();
 router.use(session({
     secret: 'sonwgurbv',
@@ -36,6 +36,10 @@ router.use(session({
     saveUninitialized: false
 }));
 
+let app = express();
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', router);
 
 router.post('/login', function(req, res) {
@@ -117,7 +121,7 @@ router.get('/checkCode', function(req, res) {
 
 router.get('/logged', function(req, res) {
     res.json({ logged: req.session.idUser !== undefined });
-})
+});
 
 router.get('/logout', function(req, res) {
     if(req.session.idUser !== undefined)
@@ -125,13 +129,151 @@ router.get('/logout', function(req, res) {
     res.json({ });
 });
 
-router.get('/getUsername', function(req, res) {
+router.get('/account/getUsername', function(req, res) {
     if(req.session.idUser === undefined)
         res.json({ });
-    else
-        connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
-            res.json({ username: data[0].username });
-        });
+
+    connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
+        res.json({ username: data[0].username });
+    });
 });
+
+router.get('/account/getData', function(req, res) {
+    if(req.session.idUser === undefined)
+        res.json({ });
+
+    connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
+        res.json({
+            username: (data[0].username || ''),
+            password: (data[0].password || ''),
+            email: (data[0].email || '')
+        });
+    });
+});
+
+router.post('/account/newPhoto', multipart, function(req, res) {
+    if(req.session.idUser === undefined)
+        res.json({ success: false });
+
+    if(req.files !== undefined && req.files.file !== undefined) {
+        let file = req.files.file;
+        let ext = file.type.substring(file.type.indexOf('/') + 1);
+
+        connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
+            let username = data[0].username;
+            fs.renameSync(file.path, path.join(PATH_UPLOADS, username + '.' + ext));
+
+            fs.readdirSync(path.join(__dirname, PATH_UPLOADS)).map(filename => {
+                if(filename.indexOf(username) === 0 && filename !== username + '.' + ext)
+                    fs.unlinkSync(path.join(__dirname, PATH_UPLOADS, filename));
+            });
+            res.json({ success: true });
+        });
+    } else
+        res.json({ success: false });
+});
+
+router.get('/account/getPhoto', function(req, res) {
+    if(req.session.idUser === undefined)
+        res.json({ });
+
+    connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
+        let username = data[0].username;
+        fs.readdirSync(path.join(__dirname, PATH_UPLOADS)).map(filename => {
+            if(filename.indexOf(username) === 0)
+                res.sendFile(path.join(__dirname, PATH_UPLOADS, filename));
+        });
+    });
+});
+
+router.get('/account/srcPhoto', function(req, res) {
+    if(req.session.idUser === undefined)
+        res.json({ });
+
+    connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
+        let username = data[0].username;
+        fs.readdir(path.join(__dirname, PATH_UPLOADS), function(err, files) {
+            if(err)
+                res.json({ path: null });
+
+            let inviato = false;
+            files.forEach(f => {
+                if(f.indexOf(username) === 0 && !inviato  && f[username.length] === '.') {
+                    inviato = true;
+                    res.json({ path: URL + '/account/getPhoto' });
+                }
+            });
+            if(!inviato)
+                res.json({ path: null });
+        });
+    });
+});
+
+router.get('/account/remPhoto', function(req, res) {
+    if(req.session.idUser === undefined)
+        res.json({ });
+
+    connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
+        let username = data[0].username;
+        let founded = null;
+
+        fs.readdir(path.join(__dirname, PATH_UPLOADS), function(err, files) {
+           if(err)
+               res.json({ removed: false });
+           files.forEach(f => {
+               if(f.indexOf(username) === 0 && f[username.length] === '.' && founded == null)
+                   founded = f;
+           });
+
+           if(typeof founded === 'string') {
+               fs.unlinkSync(path.join(__dirname, PATH_UPLOADS, founded));
+               res.json({ removed: true });
+           } else
+               res.json({ removed: false });
+        });
+    });
+});
+
+router.post('/account/emailChangeData', function(req, res) {
+    if(req.session.idUser === undefined)
+        res.json({ });
+
+    let { name, value } = req.body;
+    connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
+        if(err)
+            res.json({ success: false });
+
+        const code = data[0].code;
+        const emailTo = data[0].email;
+        const transporter = mailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: EMAIL,
+                pass: EMAIL_PASS
+            }
+        });
+
+        fs.readFile(path.join(__dirname, 'public', 'htmls', 'emails', 'changeData.html'), { encoding: 'utf-8' }, function(err, data) {
+            if(err)
+                res.json({ success: false });
+            data = data.replaceAll('#nameData', name.toUpperCase());
+            data = data.replaceAll('#link', `${URL}/pageChangeData?name=${name}&?code=${code}`);
+
+            transporter.sendMail({
+                from: EMAIL,
+                to: emailTo,
+                subject: `Cambio ${name}`,
+                html: data,
+                attachments: [
+                    {
+                        file: 'logo.png',
+                        path: path.join(__dirname, 'public', 'images', 'logo.png'),
+                        cid: 'logo.image'
+                    }
+                ]
+            }).then(() => res.json({ success: true }));
+        });
+    });
+})
 
 app.listen(PORT);

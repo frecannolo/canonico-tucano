@@ -1,11 +1,9 @@
 <mat-icon *ngIf="width < 700" id="icon-menu" (click)="openMenu()">menu</mat-icon>
 
 <div id="username">
-  <!--<mat-icon *ngIf="user.fotoProfilo == null || user.fotoProfilo == undefined">account_circle</mat-icon>
-  <img id="user-image" *ngIf="user.fotoProfilo != null && user.fotoProfilo != undefined" [src]="user.fotoProfilo">
-  <p id="p-username">{{user.username}}</p>-->
-  <mat-icon>account_circle</mat-icon>
-  <p id="p-username">{{username}}</p>
+  <mat-icon *ngIf="user.photo == null">account_circle</mat-icon>
+  <img id="user-image" *ngIf="user.photo != null" [src]="user.photo">
+  <p id="p-username" (click)="pages.page = 'account'">{{username}}</p>
 </div>
 
 <div id="div-name" *ngIf="width >= 700">
@@ -15,4 +13,4 @@
 
 <div id="void" *ngIf="width < 700"></div>
 
-<p id="logout" (click)="user.logout()">Logout</p>
+<p id="logout" (click)="logout()">Logout</p>

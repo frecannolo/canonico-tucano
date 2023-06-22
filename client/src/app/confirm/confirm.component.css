@@ -1,0 +1,58 @@
+#container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  padding: 20px 20px;
+  width: 260px;
+}
+
+#header {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#header p {
+  font-size: 17px;
+  color: #673ab7;
+  letter-spacing: 0.08em;
+  margin: auto 50px auto 0;
+
+}
+
+mat-icon {
+  color: #cccccc;
+}
+
+mat-icon:hover {
+  color: #9b9b9b;
+  cursor: pointer;
+}
+
+#footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#btn-confirm {
+  background-color: #2ca62c;
+  margin-bottom: 15px;
+  color: white;
+}
+
+#error {
+  margin-top: 10px;
+  color: #f44336;
+  letter-spacing: 0.07em;
+}
+
+mat-progress-bar {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+}

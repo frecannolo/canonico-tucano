@@ -7,7 +7,7 @@ import {Router} from "@angular/router";
   providedIn: 'root'
 })
 export class UserService {
-  logged: boolean = false;
+  photo: string | null = null;
 
   constructor(public http: HttpClient, public router: Router) { }
 
@@ -28,11 +28,13 @@ export class UserService {
     });
   }
 
-  logout(): void {
-    setTimeout(
-      () => this.http.get('/logout').subscribe(
-        () => this.router.navigate(['/'])),
-      1000);
+  logout(callback?: any): void {
+    setTimeout(() => this.http.get('/logout')
+      .subscribe(() => {
+        if(callback != undefined)
+          callback();
+        this.router.navigate(['/'])
+      }), 1000);
   }
 
   getLogged(): Observable<any> {
@@ -40,6 +42,29 @@ export class UserService {
   }
 
   getUsername(): Observable<any> {
-    return this.http.get('/getUsername');
+    return this.http.get('/account/getUsername');
+  }
+
+  getData(): Observable<any> {
+    return this.http.get('/account/getData');
+  }
+
+  sendNewPhoto(fd: FormData): Observable<any> {
+    return this.http.post('/account/newPhoto', fd);
+  }
+
+  srcPhoto(): Observable<any> {
+    return this.http.get('/account/srcPhoto');
+  }
+
+  remPhoto(): Observable<any> {
+    return this.http.get('/account/remPhoto');
+  }
+
+  sendEmailChangeData(name: string, value: string): Observable<any> {
+    return this.http.post('/account/emailChangeData', {
+      name: name,
+      value: value
+    });
   }
 }

@@ -1,0 +1,23 @@
+<div id="container">
+  <div id="header">
+    <p>Digita la password</p>
+    <mat-icon (click)="cds.dialog.close()">close</mat-icon>
+  </div>
+
+  <div id="content">
+    <mat-form-field appearance="outline">
+      <mat-label>Password</mat-label>
+      <input matInput #password [type]="passwordHided? 'password': 'text'">
+      <button mat-icon-button matSuffix (click)="passwordHided = !passwordHided" [attr.aria-pressed]="passwordHided">
+        <mat-icon>{{passwordHided ? 'visibility_off' : 'visibility'}}</mat-icon>
+      </button>
+    </mat-form-field>
+  </div>
+
+  <div id="footer">
+    <button mat-button id="btn-confirm" (click)="confirm(password.value)">Conferma</button>
+    <p *ngIf="error" id="error">La password non è corretta</p>
+  </div>
+
+  <mat-progress-bar *ngIf="load" mode="indeterminate"></mat-progress-bar>
+</div>

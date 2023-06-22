@@ -11,21 +11,30 @@ app-navbar {
 
 #main {
   height: calc(100% - 60px);
+  display: flex;
+  flex-direction: row;
 }
 
 app-menu-fisso {
   height: 100%;
-  width: 230px;
+  width: 280px;
   display: flex;
   flex-direction: column;
   background-color: #eaeaea;
 }
 
+app-account-page {
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  width: 100%;
+}
+
 mat-progress-bar {
   position: absolute;
   bottom: 0;
-  width: calc(100% - 230px);
-  left: 230px;
+  width: calc(100% - 280px);
+  left: 280px;
 }
 
 

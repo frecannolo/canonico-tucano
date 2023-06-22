@@ -2,3 +2,28 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+#change-photo * {
+  color: #673ab7;
+}
+
+#remove-photo * {
+  color: #f44336;
+}
+
+#remove-photo:hover *, #change-photo:hover * {
+  color: white;
+}
+
+.mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+/*
+.mat-mdc-form-field-infix {
+  min-height: 44px;
+  height: 44px;
+}
+
+.mat-mdc-text-field-wrapper.mdc-text-field--outlined .mat-mdc-form-field-infix {
+  padding-top: 10px;
+}*/

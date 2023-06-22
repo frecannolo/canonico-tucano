@@ -17,6 +17,8 @@ export class HomeComponent implements OnInit {
       if(!res.logged)
         this.router.navigate(['/']);
     });
+    this.user.srcPhoto().subscribe(res => this.user.photo = res.path);
+
     this.pages.load = false;
   }
 }

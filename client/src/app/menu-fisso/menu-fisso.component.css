@@ -1,7 +1,7 @@
 #top-buttons, #bottom-button {
   display: flex;
   flex-direction: column;
-  width: 230px;
+  width: 280px;
   align-items: center;
   gap: 10px;
 }

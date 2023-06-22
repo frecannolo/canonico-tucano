@@ -8,7 +8,7 @@ export class PagesService {
   readonly ICONS = ['person', 'bookmarks', 'search', 'notifications_active', 'settings'];
   readonly NAME_PAGES = ['account', 'my-bookings', 'books', 'notifications', 'settings'];
 
-  page: string = 'books';
+  page: string = 'account';
   menuDialog: any = null;
   load: boolean = false;
 

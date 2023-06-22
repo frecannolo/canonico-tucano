@@ -17,7 +17,10 @@ import { HomeComponent } from './home/home.component';
 import { NavbarComponent } from './navbar/navbar.component';
 import { MenuFissoComponent } from './menu-fisso/menu-fisso.component';
 import { AccountPageComponent } from './account-page/account-page.component';
-import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {MatDialogModule} from '@angular/material/dialog';
+import {MatMenuModule} from "@angular/material/menu";
+import {CdkAccordionModule} from "@angular/cdk/accordion";
+import {MatTooltipModule} from "@angular/material/tooltip";
 
 @NgModule({
   declarations: [
@@ -26,7 +29,7 @@ import {MatDialog, MatDialogModule} from '@angular/material/dialog';
     HomeComponent,
     NavbarComponent,
     MenuFissoComponent,
-    AccountPageComponent
+    AccountPageComponent,
   ],
   imports: [
     BrowserModule,
@@ -41,7 +44,10 @@ import {MatDialog, MatDialogModule} from '@angular/material/dialog';
     MatIconModule,
     MatProgressBarModule,
     ReactiveFormsModule,
-    MatDialogModule
+    MatDialogModule,
+    MatMenuModule,
+    CdkAccordionModule,
+    MatTooltipModule
   ],
   providers: [],
   bootstrap: [AppComponent]

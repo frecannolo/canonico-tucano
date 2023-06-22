@@ -24,6 +24,11 @@ export class NavbarComponent implements OnInit {
     this.pages.menuDialog = this.dialog.open(MenuMobileComponent);
   }
 
+  logout(): void {
+    this.pages.load = true;
+    this.user.logout();
+  }
+
   @HostListener('window:resize', ['$event'])
   onResize(): void {
     this.width = window.innerWidth;

@@ -31,13 +31,12 @@ export class MenuMobileComponent {
   onResize(): void {
     if(window.innerWidth > 700)
       try {
-        this.pages.menuDialog.closeDialog();
+        this.pages.menuDialog.close();
       } catch(ignored) { }
   }
 
   logout(): void {
     this.pages.load = true;
-    this.pages.menuDialog.closeDialog();
-    this.user.logout();
+    this.user.logout(() => this.pages.menuDialog.close());
   }
 }
