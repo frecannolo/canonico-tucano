@@ -6,7 +6,6 @@ let session = require('express-session');
 let bodyParser = require('body-parser');
 let fs = require('fs');
 let multiparty = require('connect-multiparty');
-let { exec } = require('child_process');
 
 const PORT = 3000;
 const URL = 'http://localhost:' + PORT;
@@ -239,6 +238,13 @@ router.post('/account/emailChangeData', function(req, res) {
         res.json({ });
 
     let { name, value } = req.body;
+    connection.query(`SELECT * FROM newCredential WHERE id=${req.session.idUser};`, function(err, data) {
+        if(data.length === 0)
+            connection.query(`INSERT INTO newCredential(id, ${name}) VALUES(${req.session.idUser}, '${value}')`);
+        else
+            connection.query(`UPDATE newCredential SET ${name}='${value}' WHERE id=${req.session.idUser}`);
+    });
+
     connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
         if(err)
             res.json({ success: false });
@@ -256,8 +262,8 @@ router.post('/account/emailChangeData', function(req, res) {
         fs.readFile(path.join(__dirname, 'public', 'htmls', 'emails', 'changeData.html'), { encoding: 'utf-8' }, function(err, data) {
             if(err)
                 res.json({ success: false });
-            data = data.replaceAll('#nameData', name.toUpperCase());
-            data = data.replaceAll('#link', `${URL}/pageChangeData?name=${name}&?code=${code}`);
+            data = data.replaceAll('#nameData', name);
+            data = data.replaceAll('#link', `${URL}/account/pageChangeData?name=${name}&code=${code}`);
 
             transporter.sendMail({
                 from: EMAIL,
@@ -274,6 +280,30 @@ router.post('/account/emailChangeData', function(req, res) {
             }).then(() => res.json({ success: true }));
         });
     });
-})
+});
+
+router.get('/account/pageChangeData', function(req, res) {
+    let { name, code } = req.query;
+    res.sendFile(path.join(__dirname, 'public', 'htmls', 'change_' + name + '.html'));
+});
+
+router.post('/account/checkNewData', function(req, res) {
+    let { old_p, new_p, code, type } = req.body;
+
+    connection.query(`SELECT * FROM user WHERE code='${code}'`, function(err, data) {
+       if(err || data.length === 0 || data[0][type] !== old_p)
+           res.json( { success: false });
+        else
+           connection.query(`SELECT * FROM newCredential WHERE id=${data[0].id}`, function(err, data) {
+              if(err || data.length === 0 || data[0][type] !== new_p)
+                  res.json({ success: false });
+              else {
+                  connection.query(`UPDATE user SET ${type}='${data[0][type]}' WHERE id=${data[0].id}`);
+                  connection.query(`UPDATE newCredential SET ${type}=NULL WHERE id=${data[0].id}`);
+                  res.json({success: true});
+              }
+           });
+    });
+});
 
 app.listen(PORT);

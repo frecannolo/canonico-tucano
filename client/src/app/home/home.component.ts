@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {UserService} from "../user.service";
 import {Router} from "@angular/router";
 import {PagesService} from "../pages.service";
+import {ChangeDataService} from "../changeData.service";
 
 @Component({
   selector: 'app-home',
@@ -10,7 +11,7 @@ import {PagesService} from "../pages.service";
 })
 export class HomeComponent implements OnInit {
 
-  constructor(public user: UserService, public router: Router, public pages: PagesService) { }
+  constructor(public user: UserService, public router: Router, public pages: PagesService, public cds: ChangeDataService) { }
 
   ngOnInit(): void {
     this.user.getLogged().subscribe((res: any) => {
@@ -20,5 +21,7 @@ export class HomeComponent implements OnInit {
     this.user.srcPhoto().subscribe(res => this.user.photo = res.path);
 
     this.pages.load = false;
+    this.cds.elementsToChange = [];
+    this.cds.messages = [];
   }
 }
