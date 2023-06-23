@@ -26,7 +26,14 @@ export class ChangeDataService {
           });
         });
       } else {
-
+        this.user.changeData(el.name, el.value).subscribe(() => {
+          this.messages.push({
+            text: `il campo ${el.name} è stato aggiornato`,
+            icon: 'done',
+            color: '#2ca62c',
+            visible: true
+          });
+        });
       }
       /*this.messages.push({
         text: el.needEmail? `completare il cambio di ${el.name} via email`: `il campo ${el.name} è stato aggiornato`,

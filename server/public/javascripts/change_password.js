@@ -21,8 +21,8 @@ confirm.addEventListener('click', function() {
             type: 'POST',
             url: '/account/checkNewData',
             data: JSON.stringify({
-               old_p: old_passwd.value,
-               new_p: new_passwd.value,
+               psw: old_passwd.value,
+               new_val: new_passwd.value,
                code: code,
                type: type
             }),

@@ -67,4 +67,11 @@ export class UserService {
       value: value
     });
   }
+
+  changeData(name: string, value: string): Observable<any> {
+    return this.http.post('/account/changeData', {
+      name: name,
+      value: value
+    });
+  }
 }

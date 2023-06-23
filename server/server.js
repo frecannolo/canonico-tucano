@@ -145,7 +145,7 @@ router.get('/account/getData', function(req, res) {
         res.json({
             username: (data[0].username || ''),
             password: (data[0].password || ''),
-            email: (data[0].email || '')
+            email: (data[0].email || ''),
         });
     });
 });
@@ -284,26 +284,73 @@ router.post('/account/emailChangeData', function(req, res) {
 
 router.get('/account/pageChangeData', function(req, res) {
     let { name, code } = req.query;
-    res.sendFile(path.join(__dirname, 'public', 'htmls', 'change_' + name + '.html'));
+    connection.query(`SELECT * FROM user WHERE code='${code}';`, function(err, data) {
+        if(err || data.length === 0)
+            res.send('Non puoi accedere a questa pagina');
+        else {
+            connection.query(`SELECT * FROM newCredential WHERE id=${data[0].id};`, function(err, data) {
+                if(err || data.length === 0)
+                    res.send('Non puoi accedere a questa pagina');
+                else {
+                    let everyNULL = true;
+                    for (let key in data[0])
+                        if (key !== 'id' && data[0][key] != null) {
+                            everyNULL = false;
+                            break;
+                        }
+
+                    if (everyNULL)
+                        res.send('Non puoi accedere a questa pagina');
+                    else
+                        res.sendFile(path.join(__dirname, 'public', 'htmls', 'change_' + name + '.html'));
+                }
+            });
+        }
+    })
 });
 
 router.post('/account/checkNewData', function(req, res) {
-    let { old_p, new_p, code, type } = req.body;
+    let { psw, new_val, code, type } = req.body;
 
     connection.query(`SELECT * FROM user WHERE code='${code}'`, function(err, data) {
-       if(err || data.length === 0 || data[0][type] !== old_p)
+        if(err || data.length === 0 || data[0].password !== psw)
            res.json( { success: false });
         else
            connection.query(`SELECT * FROM newCredential WHERE id=${data[0].id}`, function(err, data) {
-              if(err || data.length === 0 || data[0][type] !== new_p)
+              if(err || data.length === 0 || data[0][type] !== new_val)
                   res.json({ success: false });
               else {
-                  connection.query(`UPDATE user SET ${type}='${data[0][type]}' WHERE id=${data[0].id}`);
+                  connection.query(`UPDATE user SET ${type}='${new_val}' WHERE id=${data[0].id}`);
                   connection.query(`UPDATE newCredential SET ${type}=NULL WHERE id=${data[0].id}`);
-                  res.json({success: true});
+                  connection.query(`SELECT * FROM newCredential WHERE id=${data[0].id};`, function(err, data) {
+                      let everyNULL = true;
+                      for(let key in data[0])
+                          if(key !== 'id' && data[0][key] != null) {
+                              everyNULL = false;
+                              break;
+                          }
+
+                      if(everyNULL)
+                          connection.query(`DELETE FROM newCredential WHERE id=${data[0].id};`);
+
+                      res.json({ success: true });
+                  });
               }
            });
     });
+});
+
+router.post('/account/changeData', function(req, res) {
+    if(req.session.idUser === undefined)
+        res.json({ });
+
+    let { name, value } = req.body;
+    connection.query(`UPDATE user SET ${name}='${value}' WHERE id=${req.session.idUser};`);
+    res.json({ });
+})
+
+router.post('/account/emailRemAccount', function(req, res) {
+
 });
 
 app.listen(PORT);
