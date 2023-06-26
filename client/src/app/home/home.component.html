@@ -3,6 +3,7 @@
 <div id="main">
   <app-menu-fisso></app-menu-fisso>
   <app-account-page *ngIf="pages.page == 'account'"></app-account-page>
+  <app-prenota-page *ngIf="pages.page == 'books'"></app-prenota-page>
 </div>
 
 <mat-progress-bar mode="indeterminate" *ngIf="pages.load"></mat-progress-bar>

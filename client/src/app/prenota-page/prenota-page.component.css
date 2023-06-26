@@ -1,0 +1,176 @@
+#container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+
+#panel-plan {
+  width: 60%;
+  margin-bottom: 50px;
+  display: none;
+}
+
+#panel-plan > mat-expansion-panel-header {
+  font-size: 15px;
+  height: 60px;
+}
+
+#plans {
+  width: 100%;
+}
+
+.img-plan {
+  width: 80%;
+  margin: 40px 10% 0 10%;
+}
+
+.room {
+  position: absolute;
+  background-color: transparent;
+  letter-spacing: 0.08em;
+  font-size: 18px;
+  text-transform: uppercase;
+}
+
+#search-icon {
+  cursor: pointer;
+}
+
+#search {
+  width: 100%;
+  margin: 50px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#input_search {
+  width: 100%;
+}
+
+#panelOptions {
+  width: 80%;
+  margin: 10px 10% 0 10%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#main_search {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 15px;
+}
+
+#options {
+  height: 100%;
+  text-align: center;
+  cursor: pointer;
+}
+
+#error {
+  color: #f44336;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+#p-error {
+  letter-spacing: 0.075em;
+}
+
+mat-chip-set {
+  margin: 10px auto 20px auto;
+  width: 100%;
+}
+
+mat-chip-option {
+  margin: 0 20px;
+}
+
+#cards {
+  width: 85%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.card-with-button {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin: 15px 0;
+  padding: 10px 20px;
+  width: 70%;
+  min-width: 350px;
+}
+.card-with-button mat-card-content {
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.right-align {
+  text-align: right;
+}
+
+input.right-align::-webkit-outer-spin-button,
+input.right-align::-webkit-inner-spin-button {
+  display: none;
+}
+
+#select-time {
+  display: flex;
+  padding: 10px 0;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  flex-direction: row;
+  gap: 15px;
+}
+
+#select-time > div {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: left;
+  width: 175px;
+  gap: 5px;
+}
+
+#message-search {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin-top: -10px;
+  font-size: 15px;
+  color: #a6a6a6;
+  letter-spacing: 0.08em;
+}
+
+@media screen and (min-width: 1000px) {
+  #panelOptions {
+    width: 60%;
+    margin: 10px unset 0 unset;
+  }
+
+  #input_search {
+    width: 400px;
+  }
+  #panel-plan {
+    display: block;
+  }
+
+  #message-search {
+    display: none;
+  }
+}

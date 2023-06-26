@@ -347,10 +347,30 @@ router.post('/account/changeData', function(req, res) {
     let { name, value } = req.body;
     connection.query(`UPDATE user SET ${name}='${value}' WHERE id=${req.session.idUser};`);
     res.json({ });
-})
+});
 
-router.post('/account/emailRemAccount', function(req, res) {
+router.post('/books/getRooms', function(req, res) {
+    if(req.session.idUser === undefined)
+        res.json({ });
 
+    connection.query('SELECT * FROM room;', function(err, data) {
+        data.forEach(d => {
+            d.css = JSON.parse(d.css);
+            d.css.left = d.css.sx;
+            delete d.css.sx;
+        });
+        if(err)
+            res.json({ rooms: [] });
+        else
+            res.json({ rooms: data });
+    })
+});
+
+router.get('/books/getPlan', function(req, res) {
+    if(req.session.idUser === undefined)
+        res.json({ });
+    else
+        res.sendFile(path.join(__dirname, 'public', 'images', 'zones', req.query.name + '.png'));
 });
 
 app.listen(PORT);

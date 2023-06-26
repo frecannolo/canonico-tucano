@@ -21,6 +21,13 @@ import {MatDialogModule} from '@angular/material/dialog';
 import {MatMenuModule} from "@angular/material/menu";
 import {CdkAccordionModule} from "@angular/cdk/accordion";
 import {MatTooltipModule} from "@angular/material/tooltip";
+import { PrenotaPageComponent } from './prenota-page/prenota-page.component';
+import {MatExpansionModule} from "@angular/material/expansion";
+import {MatChipsModule} from "@angular/material/chips";
+import {MatDatepickerModule} from "@angular/material/datepicker";
+import {MatTabsModule} from "@angular/material/tabs";
+import { SearchRoomPipe } from './search-room.pipe';
+import { VisRoomPipe } from './vis-room.pipe';
 
 @NgModule({
   declarations: [
@@ -30,6 +37,9 @@ import {MatTooltipModule} from "@angular/material/tooltip";
     NavbarComponent,
     MenuFissoComponent,
     AccountPageComponent,
+    PrenotaPageComponent,
+    SearchRoomPipe,
+    VisRoomPipe,
   ],
   imports: [
     BrowserModule,
@@ -47,7 +57,11 @@ import {MatTooltipModule} from "@angular/material/tooltip";
     MatDialogModule,
     MatMenuModule,
     CdkAccordionModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatExpansionModule,
+    MatChipsModule,
+    MatDatepickerModule,
+    MatTabsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

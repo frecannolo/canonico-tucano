@@ -23,7 +23,7 @@ app-menu-fisso {
   background-color: #eaeaea;
 }
 
-app-account-page {
+app-account-page, app-prenota-page {
   display: flex;
   flex-direction: column;
   overflow: auto;

@@ -1,0 +1,106 @@
+<div id="container">
+  <div id="search">
+    <div id="main_search">
+      <mat-form-field appearance="outline" id="input_search">
+        <mat-label>Cerca una stanza dal nome</mat-label>
+        <input #Search matInput (keyup)="changeIcon(Search)" [(ngModel)]="filter">
+        <mat-icon matSuffix id="search-icon" (click)="cancel(Search)">{{iconSearch}}</mat-icon>
+      </mat-form-field>
+      <button mat-icon-button><mat-icon id="options">tune</mat-icon></button>
+    </div>
+  </div>
+
+  <mat-expansion-panel id="panel-plan">
+    <mat-expansion-panel-header>
+      <mat-panel-title>Consulta le piantine</mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <div id="plans">
+      <mat-tab-group>
+        <mat-tab *ngFor="let zone of zones | visRoom:filter" [label]="zone.name">
+          <img class='img-plan' [src]="user.URL_S + '/books/getPlan?name=' + zone.name.split(' ').join('_')">
+          <button mat-button class="room" [ngStyle]="btn.css" *ngFor="let btn of zone.rooms">{{btn.name}}</button>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+  </mat-expansion-panel>
+
+  <div id="cards">
+    <mat-card *ngFor="let room of rooms | searchRoom:filter" class="card-with-button">
+      <mat-card-content><strong>{{room.name}}</strong></mat-card-content>
+      <mat-card-content>{{room.zona}}</mat-card-content>
+      <button mat-raised-button color="accent">Apri</button>
+    </mat-card>
+  </div>
+</div>
+
+<!--<div id="search">
+  <div id="main_search">
+    <mat-form-field appearance="outline" id="input_search">
+      <mat-label>Search a room by name</mat-label>
+      <input #Search matInput (keyup)="search(Search, PanelOptions.expanded, inputCalendar.value, valMin.value, valMax.value)">
+      <mat-icon matSuffix id="search-icon" (click)="cancel(Search)">{{iconSearch}}</mat-icon>
+    </mat-form-field>
+    <button mat-icon-button (click)="togglePanelOption(Search, PanelOptions, inputCalendar.value, valMin.value, valMax.value)"><mat-icon id="options">tune</mat-icon></button>
+  </div>
+  <mat-expansion-panel #PanelOptions id="panelOptions">
+    <mat-chip-set>
+      <mat-chip-option color="accent" *ngFor="let zone of COMPLETED_ZONES; let i = index" (selectionChange)="changeChip(i, Search, inputCalendar.value, valMin.value, valMax.value)">{{zone}}</mat-chip-option>
+    </mat-chip-set>
+    <div id="select-time">
+      <mat-form-field>
+        <mat-label>select a date</mat-label>
+        <input matInput [matDatepicker]="dp3" disabled #inputCalendar (dateChange)="search(Search, PanelOptions.expanded, inputCalendar.value, valMin.value, valMax.value)">
+        <mat-datepicker-toggle matIconSuffix [for]="dp3"></mat-datepicker-toggle>
+        <mat-datepicker #dp3 disabled="false"></mat-datepicker>
+      </mat-form-field>
+      <div>
+        <mat-form-field floatLabel="always">
+          <mat-label>From</mat-label>
+          <input matInput type="number" min="9" max="17" class="right-align" value="9" #valMin (keyup)="search(Search, PanelOptions.expanded, inputCalendar.value, valMin.value, valMax.value)">
+          <span matTextSuffix>:00</span>
+        </mat-form-field>
+        <mat-form-field floatLabel="always">
+          <mat-label>To</mat-label>
+          <input matInput type="number" min="10" max="18" class="right-align" value="18" #valMax (keyup)="search(Search, PanelOptions.expanded, inputCalendar.value, valMin.value, valMax.value)">
+          <span matTextSuffix>:00</span>
+        </mat-form-field>
+      </div>
+    </div>
+  </mat-expansion-panel>
+</div>
+
+<p id="message-search" *ngIf="elSelected.length == 0">Search the perfect room for you</p>
+
+<mat-expansion-panel id="panel-plan">
+  <mat-expansion-panel-header>
+    <mat-panel-title>Consult the plans</mat-panel-title>
+  </mat-expansion-panel-header>
+  <div *ngIf="elementNotFoundError" id="error">
+    <mat-icon>error</mat-icon>
+    <p id="p-error">There aren't any rooms for your requests</p>
+  </div>
+
+  <div id="plans">
+    <mat-tab-group>
+      <mat-tab *ngFor="let zone of ZONES; let i = index" [label]="zone">
+        <img class='img-plan' [src]="'assets/zones/' + zone.split(' ').join('_') + '.png'">
+        <button mat-button *ngFor="let btn of BUTTON_ZONES[i]" (click)="open(btn.name, zone)" [ngStyle]="{
+        'top': btn.top,
+        'left': btn.sx,
+        'height': btn.height,
+        'bottom': btn.bottom,
+        'width': btn.width,
+        'background-color': btn.searched? '#ffd740': 'transparent' }" class="room">{{btn.name}}</button>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</mat-expansion-panel>
+
+<div id="cards">
+  <mat-card *ngFor="let el of elSelected" class="card-with-button">
+    <mat-card-content><strong>{{el.name}}</strong></mat-card-content>
+    <mat-card-content>{{el.zone}}</mat-card-content>
+    <button mat-raised-button color="accent" (click)="open(el.name, el.zone)">Open</button>
+  </mat-card>
+</div>-->

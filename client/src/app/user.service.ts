@@ -7,6 +7,7 @@ import {Router} from "@angular/router";
   providedIn: 'root'
 })
 export class UserService {
+  readonly URL_S: string = 'http://localhost:3000';
   photo: string | null = null;
 
   constructor(public http: HttpClient, public router: Router) { }
@@ -73,5 +74,9 @@ export class UserService {
       name: name,
       value: value
     });
+  }
+
+  getRooms(): Observable<any> {
+    return this.http.post('/books/getRooms', {});
   }
 }

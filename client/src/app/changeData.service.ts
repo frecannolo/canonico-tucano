@@ -35,13 +35,5 @@ export class ChangeDataService {
           });
         });
       }
-      /*this.messages.push({
-        text: el.needEmail? `completare il cambio di ${el.name} via email`: `il campo ${el.name} è stato aggiornato`,
-        icon: el.needEmail? 'schedule': 'done',
-        color: el.needEmail? '#ffd740': '#2ca62c',
-        visible: true
-      });*/
-
-
   }
 }
