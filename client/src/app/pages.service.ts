@@ -11,6 +11,7 @@ export class PagesService {
   page: string = 'books';
   menuDialog: any = null;
   load: boolean = false;
+  divInSearch: string = 'div-1';
 
   constructor() { }
 

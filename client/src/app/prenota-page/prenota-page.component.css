@@ -84,6 +84,7 @@
 
 #p-error {
   letter-spacing: 0.075em;
+  margin: 0;
 }
 
 mat-chip-set {
@@ -156,6 +157,7 @@ input.right-align::-webkit-inner-spin-button {
   color: #a6a6a6;
   letter-spacing: 0.08em;
 }
+
 
 @media screen and (min-width: 1000px) {
   #panelOptions {

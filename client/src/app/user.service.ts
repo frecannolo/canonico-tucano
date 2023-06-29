@@ -79,4 +79,16 @@ export class UserService {
   getRooms(): Observable<any> {
     return this.http.post('/books/getRooms', {});
   }
+
+  saveBook(name: string, zone: string, day: string, time: string, reason: string): Observable<any> {
+    return this.http.get(`/books/saveBook?name=${name}&zone=${zone}&day=${day}&time=${time}&reason=${reason}`)
+  }
+
+  getBooks(name: string, zone: string): Observable<any> {
+    return this.http.get(`/books/getBooks?name=${name}&zone=${zone}`);
+  }
+
+  getUsernameById(id: number): Observable<any> {
+    return this.http.post('/account/username-by-id', { id: id });
+  }
 }

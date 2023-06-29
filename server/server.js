@@ -373,4 +373,68 @@ router.get('/books/getPlan', function(req, res) {
         res.sendFile(path.join(__dirname, 'public', 'images', 'zones', req.query.name + '.png'));
 });
 
+router.get('/books/getBook', function(req, res) {
+    if(req.session.idUser === undefined)
+        res.json({ });
+    else {
+        const { day, time } = req.query;
+        connection.query(`SELECT * FROM room_booking WHERE day='${day}' && time='${time}';`, function(err, data) {
+            if(err)
+                res.json({ data: [] });
+            else
+               res.json({ data: data });
+        });
+    }
+});
+
+router.get('/books/saveBook', function(req, res) {
+    if(req.session.idUser === undefined)
+        res.json({ });
+    else {
+        const { name, zone, day, time, reason } = req.query;
+        let d = new Date();
+        let s = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} at ${d.getHours()}:${d.getMinutes()}`;
+
+        connection.query(`INSERT INTO room_booking(name, zone, day, time, user, reason, date_booking) VALUES('${name}', '${zone}', '${day}', '${time}', ${req.session.idUser}, '${reason}', '${s}');`);
+        res.json({
+            success: true,
+            save: {
+                name: name,
+                zone: zone,
+                day: day,
+                time: time,
+                user: req.session.idUser,
+                reason: reason,
+                date_booking: s
+            }
+        });
+    }
+});
+
+router.get('/books/getBooks', function(req, res) {
+    if (req.session.idUser === undefined)
+        res.json({ });
+    else {
+        const { name, zone } = req.query;
+        connection.query(`SELECT * FROM room_booking WHERE name='${name}' && zone='${zone}';`, function(err, data) {
+           if(err)
+               res.json({ data: [] });
+           else
+               res.json({ data: data });
+        });
+    }
+});
+
+router.post('/account/username-by-id', function(req, res) {
+    if (req.session.idUser === undefined)
+        res.json({ });
+    else
+        connection.query(`SELECT * FROM user WHERE id=${req.body.id};`, function(err, data) {
+            if(err || data.length === 0)
+                res.json({ user: 'inesistente' });
+            else
+                res.json({ user: data[0].username });
+        });
+});
+
 app.listen(PORT);

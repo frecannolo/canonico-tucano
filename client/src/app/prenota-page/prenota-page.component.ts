@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {UserService} from "../user.service";
+import {PagesService} from "../pages.service";
 
 @Component({
   selector: 'app-prenota-page',
@@ -12,9 +13,13 @@ export class PrenotaPageComponent implements OnInit {
   rooms: any[] = [];
   filter: string = '';
 
-  constructor(public user: UserService) { }
+  roomName: string = '';
+  roomZone: string = '';
+
+  constructor(public user: UserService, public pages: PagesService) { }
 
   ngOnInit(): void {
+    this.pages.divInSearch = 'div-1';
     this.user.getRooms().subscribe(res => {
       res.rooms.forEach((d: any): void => {
         let i = -1;
@@ -43,6 +48,13 @@ export class PrenotaPageComponent implements OnInit {
     if (this.iconSearch == 'close') {
       input.value = '';
       this.iconSearch = 'search';
+      this.filter = '';
     }
+  }
+
+  open(name: string, zone: string): void {
+    this.pages.divInSearch = 'div-2';
+    this.roomName = name;
+    this.roomZone = zone;
   }
 }

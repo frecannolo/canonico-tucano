@@ -1,0 +1,95 @@
+<div id="container">
+  <div id="info">
+    <mat-list role="list" id="list">
+      <mat-list-item role="listitem"><strong>nome:&nbsp;</strong> {{name}}</mat-list-item>
+      <mat-list-item role="listitem"><strong>zona:&nbsp;</strong> {{zone}}</mat-list-item>
+    </mat-list>
+
+    <button mat-button class="button-history" color="primary">
+      <strong>
+        <mat-icon>history</mat-icon>
+        Cronologia
+      </strong>
+    </button>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <div id="calendar" *ngIf="calendar.content == 'calendar'">
+    <div id="inputs">
+      <mat-form-field color="accent">
+        <mat-label>Scegli una data</mat-label>
+        <input #inputDate matInput [matDatepicker]="date" disabled (dateChange)="rewrite(inputDate)">
+        <mat-datepicker-toggle matIconSuffix [for]="date"></mat-datepicker-toggle>
+        <mat-datepicker #date disabled="false"></mat-datepicker>
+      </mat-form-field>
+      <button class="button-options" mat-raised-button color="accent" (click)="set(calendar.stringToDate(inputDate.value))">Go</button>
+      <button class="button-options" mat-raised-button color="accent" (click)="set()">Today</button>
+      <mat-checkbox #selectMore (change)="calendar.selectMore = selectMore.checked">seleziona di più</mat-checkbox>
+    </div>
+
+    <div id="table">
+      <div class="column" id="first-col">
+        <div id="top-left">
+          <button mat-button class="btn-shift" (click)="shiftLeft()"><mat-icon>chevron_left</mat-icon></button>
+          <button mat-button class="btn-shift" (click)="shiftRight()"><mat-icon>chevron_right</mat-icon></button>
+        </div>
+        <div *ngFor="let hour of hours" class="write-hour">{{hour}}</div>
+      </div>
+      <div class="column" *ngFor="let day of days">
+        <div class="write-day" [id]="day.today? 'today': ''">
+          <p>{{day.dayName}}</p>
+          <p>{{day.day}}</p>
+        </div>
+        <app-point-in-calendar [hour]="h" [date]="calendar.stringToDate(day.day)" [book]="getBook(day, h)" *ngFor="let h of hours"></app-point-in-calendar>
+      </div>
+    </div>
+
+    <div id="buttons" *ngIf="lengthSelected() > 0">
+      <button mat-raised-button color="primary" (click)="completeBooking()">
+        <mat-icon>done</mat-icon>Prenota
+      </button>
+      <button mat-raised-button color="warn" (click)="calendar.cancelAll()">
+        <mat-icon>delete</mat-icon>Cancella tutto
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="calendar.content == 'end-book'" id="end-book">
+    <div id="cards">
+      <mat-card *ngFor="let req of requests">
+        <mat-card-content style="padding: 0">
+          <strong>Prenotazione: </strong>{{name}} il {{req.day}} per {{req.nHours}} or{{req.nHours > 1? 'e': 'a'}} ({{req.start}}&nbsp;-&nbsp;{{req.end}})
+        </mat-card-content>
+        <mat-card-content style="padding: 0">
+          <textarea #reason matInput required placeholder="scrivi il motivo (obbligatorio)" [disabled]="req.endConfirm"></textarea>
+        </mat-card-content>
+        <mat-card-content id="buttons-confirm" style="padding: 0">
+          <button *ngIf="!req.endConfirm" mat-button color="warn" (click)="remove(req)">Rimuovi</button>
+          <button *ngIf="!req.endConfirm" mat-button color="primary" (click)="req.endConfirm = true" [disabled]="reason.value.trim() == ''">prenota</button>
+          <button *ngIf="req.endConfirm" mat-button color="warn" (click)="req.endConfirm = false">no</button>
+          <button *ngIf="req.endConfirm" mat-button class="yes" (click)="saveBook(req, reason)">conferma</button>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    <button mat-button color="warn" class="button-close" (click)="calendar.content = 'calendar'">torna al calendario</button>
+  </div>
+
+  <div *ngIf="calendar.content == 'info-book'" id="info-book">
+    <p id="title-info">INFO SULLA PRENOTAZIONE</p>
+    <mat-divider></mat-divider>
+    <div id="info-booking">
+      <div><p>giorno:</p>{{calendar.bookOpened.day}}</div>
+      <div><p>orario:</p>{{calendar.bookOpened.time}}</div>
+      <div><p>data di prenotazione:</p>{{calendar.bookOpened.date_booking}}</div>
+      <div><p>utente:</p>{{calendar.bookOpened.user}}</div>
+      <div><p>motivazione:</p>{{calendar.bookOpened.reason}}</div>
+    </div>
+    <mat-divider></mat-divider>
+    <button mat-button color="warn" class="button-close" (click)="calendar.content = 'calendar'">torna al calendario</button>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <button mat-button id="back-button" color="warn" (click)="pages.divInSearch = 'div-1'">TORNA INDIETRO</button>
+</div>

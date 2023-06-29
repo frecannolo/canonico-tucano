@@ -25,9 +25,13 @@ import { PrenotaPageComponent } from './prenota-page/prenota-page.component';
 import {MatExpansionModule} from "@angular/material/expansion";
 import {MatChipsModule} from "@angular/material/chips";
 import {MatDatepickerModule} from "@angular/material/datepicker";
+import {MatNativeDateModule} from "@angular/material/core";
 import {MatTabsModule} from "@angular/material/tabs";
 import { SearchRoomPipe } from './search-room.pipe';
 import { VisRoomPipe } from './vis-room.pipe';
+import { BooksRoomComponent } from './books-room/books-room.component';
+import { PointInCalendarComponent } from './point-in-calendar/point-in-calendar.component';
+import {MatCheckboxModule} from "@angular/material/checkbox";
 
 @NgModule({
   declarations: [
@@ -40,6 +44,8 @@ import { VisRoomPipe } from './vis-room.pipe';
     PrenotaPageComponent,
     SearchRoomPipe,
     VisRoomPipe,
+    BooksRoomComponent,
+    PointInCalendarComponent
   ],
   imports: [
     BrowserModule,
@@ -60,8 +66,10 @@ import { VisRoomPipe } from './vis-room.pipe';
     MatTooltipModule,
     MatExpansionModule,
     MatChipsModule,
+    MatNativeDateModule,
     MatDatepickerModule,
-    MatTabsModule
+    MatTabsModule,
+    MatCheckboxModule
   ],
   providers: [],
   bootstrap: [AppComponent]
