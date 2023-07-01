@@ -3,6 +3,7 @@ import {UserService} from "../user.service";
 import {Router} from "@angular/router";
 import {PagesService} from "../pages.service";
 import {ChangeDataService} from "../changeData.service";
+import {HistoryService} from "../history.service";
 
 @Component({
   selector: 'app-home',
@@ -11,7 +12,7 @@ import {ChangeDataService} from "../changeData.service";
 })
 export class HomeComponent implements OnInit {
 
-  constructor(public user: UserService, public router: Router, public pages: PagesService, public cds: ChangeDataService) { }
+  constructor(public user: UserService, public router: Router, public pages: PagesService, public cds: ChangeDataService, public history: HistoryService) { }
 
   ngOnInit(): void {
     this.user.getLogged().subscribe((res: any) => {

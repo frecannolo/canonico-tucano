@@ -1,0 +1,64 @@
+<div id="container">
+  <p id="title">LE MIE PRENOTAZIONI:</p>
+
+  <div id="inputs">
+    <mat-form-field appearance="outline" id="search">
+      <mat-label>Cerca</mat-label>
+      <input matInput [(ngModel)]="filter">
+      <mat-icon matSuffix>{{iconSearch}}</mat-icon>
+    </mat-form-field>
+
+    <div>
+      <mat-form-field>
+        <mat-label>Ordina per</mat-label>
+        <mat-select disableRipple [value]="history.value">
+          <mat-option *ngFor="let opt of history.OPTIONS" [value]="opt" (click)="changeValue(opt)">{{opt}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <button mat-icon-button (click)="changeWard()" id="up-down"><mat-icon>arrow_{{history.verso}}</mat-icon></button>
+    </div>
+  </div>
+
+  <div id="not-fixed" class="cards" [style]="'margin-bottom: ' + (history.events.length == 0? '0': '70px')">
+    <div class="card" *ngFor="let ev of history.events | miePrenotazioni:filter" [matBadge]="ev.visualized? '': '1'" matBadgeColor="accent" matBadgePosition="before">
+      <div class="infos">
+        <mat-icon *ngIf="ev.secured" class="secured-icon">push_pin</mat-icon>
+
+        <div class="card-info" (click)="toggle(ev)">
+          <p>{{ev.room}}</p>
+          <p>{{ev.zone}}</p>
+        </div>
+        <div  class="card-info" (click)="toggle(ev)">
+          <p>{{ev.day}}</p>
+          <p>{{ev.time}}</p>
+        </div>
+
+        <button mat-icon-button [matMenuTriggerFor]="menu" class="card-button">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item id="button-cancella" (click)="delete(ev)"><mat-icon>delete</mat-icon>Cancella</button>
+          <button mat-menu-item *ngIf="!ev.visualized" id="button-segna-letto" (click)="segnaGiaLetto(ev)"><mat-icon>grade</mat-icon>Segna come letto</button>
+          <button mat-menu-item id="fissa-button" (click)="fissa(ev)"><mat-icon>push_pin</mat-icon>{{ev.secured? 'non fissare': 'fissa'}} il alto</button>
+          <button mat-menu-item id="btn-mail"><mat-icon>mail</mat-icon>{{ev.time_email == null? 'manda': 'annulla'}} email di notifica</button>
+        </mat-menu>
+      </div>
+
+      <mat-divider *ngIf="ev.opened" class="div"></mat-divider>
+
+      <div *ngIf="ev.opened" class="suppl-infos" (click)="toggle(ev)">
+        <div class="suppl-info">
+          <p>motivazione:</p><p>{{ev.reason}}</p>
+        </div>
+        <div class="suppl-info">
+          <p>prenotazione del:</p><p>{{calendar.getDate(ev.date)}}</p>
+        </div>
+        <div class="suppl-info">
+          <p>email:</p><p>{{ev.time_email != null? ev.time_email + ' prima': 'non assegnata'}}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p id="message" *ngIf="history.events.length == 0">Non hai ancora effettuato alcuna prenotazione</p>
+</div>

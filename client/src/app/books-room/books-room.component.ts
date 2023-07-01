@@ -61,6 +61,12 @@ export class BooksRoomComponent implements OnInit {
 
     this.user.getBooks(this.name, this.zone).subscribe(res => {
       this.books = res.data;
+      this.books.forEach(b => {
+        let [day, cong, time] = b.date.split(' ');
+        day = this.calendar.dateToString(this.calendar.stringToDate(day));
+        time = this.calendar.intToTime(this.calendar.timeToInt(time));
+        b.date = day + ' ' + cong + ' ' + time;
+      });
 
       this.set();
     });

@@ -1,0 +1,153 @@
+#container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+#title {
+  width: 100%;
+  margin: 30px 0;
+  font-size: 22px;
+  letter-spacing: 0.12em;
+  color: #673ab7;
+  text-align: center;
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 25px;
+  width: 100%;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #d5d5d5;
+  min-width: 70%;
+  max-width: 90%;
+  border-radius: 10px;
+}
+
+.card:hover {
+  background-color: #eaeaea;
+  cursor: pointer;
+}
+
+.card:hover .card-info, .card:hover .secured-icon {
+  border-right: 2px solid #c4c4c4;
+}
+
+.infos {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 10px;
+}
+
+.card-info {
+  padding: 5px 10px;
+  flex: 1 1 auto;
+  border-right: 2px solid #eaeaea;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.card-info p {
+  margin: 0;
+  font-size: 15px;
+  letter-spacing: 0.075em;
+  color: #673ab7;
+  text-align: center;
+}
+
+.card-button {
+  color: gray;
+  margin: 0 10px;
+}
+
+.secured-icon {
+  color: gray;
+  padding: 0 20px;
+  border-right: 2px solid #eaeaea;
+}
+
+#button-cancella:hover {
+  background-color: #f44336;
+}
+
+#button-segna-letto:hover {
+  background-color: #ffd740;
+}
+
+#fissa-button:hover, #btn-mail:hover {
+  background-color: #673ab7;
+}
+
+.div {
+  width: 90%;
+  border-top-width: 0.15em;
+}
+
+.suppl-infos {
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  align-items: center;
+  margin: 15px 20px 5px 20px;
+}
+
+.suppl-info {
+  color: #673ab7;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: left;
+  gap: 5px;
+  width: 100%;
+}
+
+.suppl-info p:nth-child(1) {
+  font-size: 16px;
+  letter-spacing: 0.1em;
+  color: #492a83;
+}
+
+.suppl-info p:nth-child(2) {
+  font-size: 14px;
+  letter-spacing: 0.1em;
+}
+
+#inputs {
+  margin: 30px 0;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 20px;
+}
+
+#search {
+}
+
+#up-down {
+  color: gray;
+}
+
+#message {
+  color: gray;
+  letter-spacing: 0.085em;
+  font-size: 16px;
+  margin: 30px 0 70px 0;
+}

@@ -106,7 +106,8 @@ export class AccountPageComponent implements OnInit {
 
     this.cds.dialog = this.cds.Dialog.open(ConfirmComponent, {
       data: {
-        password: this.startData.password
+        password: this.startData.password,
+        next: this.cds.setMessages
       }
     });
   }

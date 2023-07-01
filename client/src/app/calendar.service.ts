@@ -63,6 +63,11 @@ export class CalendarService {
     return ret;
   }
 
+  getDate(d: string): string {
+    let [date, cong, hour] = d.split(' ');
+    return this.dateToString(this.stringToDate(date)) + ' ' + cong + ' ' + this.intToTime(this.timeToInt(hour));
+  }
+
   cancelAll(): void {
     for(let key in this.selected) {
       if(this.selected[key] != null) {

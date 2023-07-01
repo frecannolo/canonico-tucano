@@ -35,7 +35,7 @@ export class ConfirmComponent {
       if(this.data.password != val)
         this.error = true;
       else {
-        this.cds.setMessages();
+        this.data.next();
         this.cds.dialog.close();
       }
 

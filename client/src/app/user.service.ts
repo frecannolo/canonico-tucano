@@ -91,4 +91,20 @@ export class UserService {
   getUsernameById(id: number): Observable<any> {
     return this.http.post('/account/username-by-id', { id: id });
   }
+
+  getHistory(): Observable<any> {
+    return this.http.get('/account/get-history');
+  }
+
+  segnaGiaLetto(id: number): Observable<any> {
+    return this.http.get(`/my-books/segna-gia-letto?id=${id}`);
+  }
+
+  changeSecured(id: number, secured: boolean): Observable<any> {
+    return this.http.get(`/my-books/change-secured?id=${id}&value=${Number(!secured)}`);
+  }
+
+  removeEvent(id: number): Observable<any> {
+    return this.http.get(`/my-books/delete-book?id=${id}`);
+  }
 }

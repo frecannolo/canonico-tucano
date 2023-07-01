@@ -3,27 +3,30 @@
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
-#change-photo * {
+#change-photo *, #fissa-button *, #btn-mail * {
   color: #673ab7;
 }
 
-#remove-photo * {
+#remove-photo *, #button-cancella * {
   color: #f44336;
 }
 
-#remove-photo:hover *, #change-photo:hover * {
+#button-segna-letto * {
+  color: #ffd740;
+}
+
+#remove-photo:hover *, #change-photo:hover *, #button-cancella:hover *,#button-segna-letto:hover *, #fissa-button:hover *, #btn-mail:hover * {
   color: white;
 }
 
 .mat-mdc-form-field-subscript-wrapper {
   display: none;
 }
-/*
-.mat-mdc-form-field-infix {
-  min-height: 44px;
-  height: 44px;
-}
 
-.mat-mdc-text-field-wrapper.mdc-text-field--outlined .mat-mdc-form-field-infix {
-  padding-top: 10px;
-}*/
+.mat-badge-content.mat-badge-active {
+  color: transparent;
+  height: 30px;
+  width: 30px;
+  top: -15px;
+  left: -15px;
+}

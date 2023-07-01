@@ -32,6 +32,11 @@ import { VisRoomPipe } from './vis-room.pipe';
 import { BooksRoomComponent } from './books-room/books-room.component';
 import { PointInCalendarComponent } from './point-in-calendar/point-in-calendar.component';
 import {MatCheckboxModule} from "@angular/material/checkbox";
+import { PrenotazioniPageComponent } from './prenotazioni-page/prenotazioni-page.component';
+import { MiePrenotazioniPipe } from './mie-prenotazioni.pipe';
+import {MatBadgeModule} from "@angular/material/badge";
+import {MatSelectModule} from "@angular/material/select";
+import { NotifichePageComponent } from './notifiche-page/notifiche-page.component';
 
 @NgModule({
   declarations: [
@@ -45,32 +50,37 @@ import {MatCheckboxModule} from "@angular/material/checkbox";
     SearchRoomPipe,
     VisRoomPipe,
     BooksRoomComponent,
-    PointInCalendarComponent
+    PointInCalendarComponent,
+    PrenotazioniPageComponent,
+    MiePrenotazioniPipe,
+    NotifichePageComponent
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    BrowserAnimationsModule,
-    HttpClientModule,
-    MatCardModule,
-    MatListModule,
-    FormsModule,
-    MatButtonModule,
-    MatInputModule,
-    MatIconModule,
-    MatProgressBarModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatMenuModule,
-    CdkAccordionModule,
-    MatTooltipModule,
-    MatExpansionModule,
-    MatChipsModule,
-    MatNativeDateModule,
-    MatDatepickerModule,
-    MatTabsModule,
-    MatCheckboxModule
-  ],
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        BrowserAnimationsModule,
+        HttpClientModule,
+        MatCardModule,
+        MatListModule,
+        FormsModule,
+        MatButtonModule,
+        MatInputModule,
+        MatIconModule,
+        MatProgressBarModule,
+        ReactiveFormsModule,
+        MatDialogModule,
+        MatMenuModule,
+        CdkAccordionModule,
+        MatTooltipModule,
+        MatExpansionModule,
+        MatChipsModule,
+        MatNativeDateModule,
+        MatDatepickerModule,
+        MatTabsModule,
+        MatCheckboxModule,
+        MatBadgeModule,
+        MatSelectModule
+    ],
   providers: [],
   bootstrap: [AppComponent]
 })

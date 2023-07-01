@@ -4,6 +4,8 @@
   <app-menu-fisso></app-menu-fisso>
   <app-account-page *ngIf="pages.page == 'account'"></app-account-page>
   <app-prenota-page *ngIf="pages.page == 'books'"></app-prenota-page>
+  <app-prenotazioni-page *ngIf="pages.page == 'my-bookings'"></app-prenotazioni-page>
+  <app-notifiche-page *ngIf="pages.page == 'notifications'"></app-notifiche-page>
 </div>
 
 <mat-progress-bar mode="indeterminate" *ngIf="pages.load"></mat-progress-bar>

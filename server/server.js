@@ -378,7 +378,7 @@ router.get('/books/getBook', function(req, res) {
         res.json({ });
     else {
         const { day, time } = req.query;
-        connection.query(`SELECT * FROM room_booking WHERE day='${day}' && time='${time}';`, function(err, data) {
+        connection.query(`SELECT * FROM history WHERE day='${day}' && time='${time}' && action=1;`, function(err, data) {
             if(err)
                 res.json({ data: [] });
             else
@@ -393,9 +393,9 @@ router.get('/books/saveBook', function(req, res) {
     else {
         const { name, zone, day, time, reason } = req.query;
         let d = new Date();
-        let s = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} at ${d.getHours()}:${d.getMinutes()}`;
+        let s = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} alle ${d.getHours()}:${d.getMinutes()}`;
+        connection.query(`INSERT INTO history(action, room, zone, day, time, date, user, reason, visualized, secured) VALUES(1, '${name}', '${zone}', '${day}', '${time}', '${s}', ${req.session.idUser}, '${reason}', 0, 0);`);
 
-        connection.query(`INSERT INTO room_booking(name, zone, day, time, user, reason, date_booking) VALUES('${name}', '${zone}', '${day}', '${time}', ${req.session.idUser}, '${reason}', '${s}');`);
         res.json({
             success: true,
             save: {
@@ -416,7 +416,7 @@ router.get('/books/getBooks', function(req, res) {
         res.json({ });
     else {
         const { name, zone } = req.query;
-        connection.query(`SELECT * FROM room_booking WHERE name='${name}' && zone='${zone}';`, function(err, data) {
+        connection.query(`SELECT * FROM history WHERE room='${name}' && zone='${zone}' && action=1;`, function(err, data) {
            if(err)
                res.json({ data: [] });
            else
@@ -436,5 +436,45 @@ router.post('/account/username-by-id', function(req, res) {
                 res.json({ user: data[0].username });
         });
 });
+
+router.get('/account/get-history', function(req, res) {
+    if (req.session.idUser === undefined)
+        res.json({ });
+    else
+        connection.query(`SELECT * FROM history WHERE user=${req.session.idUser};`, function(err, data) {
+           if(err)
+               res.json({ history: [] });
+           else
+               res.json({ history: data });
+        });
+});
+
+router.get('/my-books/segna-gia-letto', function(req, res) {
+    if (req.session.idUser === undefined)
+        res.json({ });
+    else {
+        connection.query(`UPDATE history SET visualized=1 WHERE id=${req.query.id}`);
+        res.json({ success: true });
+    }
+});
+
+router.get('/my-books/change-secured', function(req, res) {
+    if (req.session.idUser === undefined)
+        res.json({ });
+    else {
+        const { id, value } = req.query;
+        connection.query(`UPDATE history SET secured=${value} WHERE id=${id}`);
+        res.json({ success: true });
+    }
+});
+
+router.get('/my-books/delete-book', function(req, res) {
+    if (req.session.idUser === undefined)
+        res.json({ });
+    else {
+        connection.query(`DELETE FROM history WHERE id=${req.query.id}`);
+        res.json({ success: true });
+    }
+})
 
 app.listen(PORT);
