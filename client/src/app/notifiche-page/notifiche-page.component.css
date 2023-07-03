@@ -1,0 +1,167 @@
+#container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+#container > * {
+  max-width: 1000px;
+}
+
+#inputs {
+  margin: 30px;
+  gap: 30px;
+}
+
+#inputs, #options {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#options, #last-n-days {
+  width: 100%;
+}
+
+#last-n-days {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: right;
+}
+
+#last-n-days p {
+  margin: 0 5px;
+}
+
+.option {
+  margin: 0;
+}
+
+section {
+  display: flex;
+  flex-direction: row;
+  gap: 30px;
+}
+
+input {
+  width: 40px;
+}
+
+mat-form-field {
+  width: 170px;
+}
+
+#notifications {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: 15px 0;
+  width: 80%;
+}
+
+.notif {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 2px solid #e7e7e7;
+  gap: 8px;
+}
+
+.notif:hover {
+  border: 2px solid #d5d5d5;
+  box-shadow: 15px 21px 50px -3px rgba(0,0,0,0.1);
+}
+
+.notif div {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 30px;
+}
+
+.notif p {
+  margin: 0;
+}
+
+.icon-toggle {
+  color: #9b9b9b;
+  cursor: pointer;
+  display: none;
+}
+
+.done {
+  color: #2ca62c;
+}
+
+.close {
+  color: #f44336;
+}
+
+.message {
+  color: gray;
+  letter-spacing: 0.085em;
+  font-size: 16px;
+  margin: 30px 20px 70px 20px;
+}
+
+@media screen and (max-width: 860px) {
+  #notifications {
+    width: 100%;
+  }
+
+  .notif {
+    width: calc(100% - 40px);
+    padding: 10px;
+    margin: 0 10px;
+  }
+}
+@media screen and (max-width: 670px) {
+  #notifications {
+    width: 80%;
+  }
+
+  .notif {
+    margin: unset;
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 560px) {
+  #notifications {
+    width: 100%;
+  }
+
+  .notif {
+    margin: 0 10px;
+    width: calc(100% - 20px);
+  }
+}
+
+@media screen and (max-width: 500px) {
+  .notif > p {
+    display: none;
+  }
+
+  .notif {
+    width: calc(100% - 60px);
+    padding: 0 10px;
+    margin: 0 10px;
+  }
+
+  .icon-toggle {
+    display: block;
+  }
+
+  #notifications {
+    margin-top: 0;
+  }
+}

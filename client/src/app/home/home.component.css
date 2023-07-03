@@ -23,7 +23,7 @@ app-menu-fisso {
   background-color: #eaeaea;
 }
 
-app-account-page, app-prenota-page, app-prenotazioni-page {
+app-account-page, app-prenota-page, app-prenotazioni-page, app-notifiche-page {
   display: flex;
   flex-direction: column;
   overflow: auto;

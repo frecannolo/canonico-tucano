@@ -96,15 +96,26 @@ export class UserService {
     return this.http.get('/account/get-history');
   }
 
-  segnaGiaLetto(id: number): Observable<any> {
-    return this.http.get(`/my-books/segna-gia-letto?id=${id}`);
+  segnaGiaLetto(id: number | undefined, room: string, zone: string, day: string, time: string): Observable<any> {
+    console.log(id)
+    if(typeof id == 'number')
+      return this.http.get(`/my-books/segna-gia-letto?id=${id}`);
+    return this.http.get(`/my-books/segna-gia-letto?room=${room}&zone=${zone}&day=${day}&time=${time}`);
   }
 
-  changeSecured(id: number, secured: boolean): Observable<any> {
-    return this.http.get(`/my-books/change-secured?id=${id}&value=${Number(!secured)}`);
+  changeSecured(id: number | undefined, secured: boolean, room: string, zone: string, day: string, time: string): Observable<any> {
+    if(typeof id == 'number')
+      return this.http.get(`/my-books/change-secured?id=${id}&value=${Number(!secured)}`);
+    return this.http.get(`/my-books/change-secured?value=${Number(!secured)}&room=${room}&zone=${zone}&day=${day}&time=${time}`);
   }
 
-  removeEvent(id: number): Observable<any> {
-    return this.http.get(`/my-books/delete-book?id=${id}`);
+  removeEvent(id: number | undefined, room: string, zone: string, day: string, time: string): Observable<any> {
+    if(typeof id == 'number')
+      return this.http.get(`/my-books/delete-book?id=${id}&room=${room}&zone=${zone}&day=${day}&time=${time}`);
+    return this.http.get(`/my-books/delete-book?room=${room}&zone=${zone}&day=${day}&time=${time}`);
+  }
+
+  clearHistory(): Observable<any> {
+    return this.http.get('/account/clear-history');
   }
 }

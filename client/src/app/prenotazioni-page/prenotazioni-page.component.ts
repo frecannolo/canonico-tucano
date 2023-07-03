@@ -1,8 +1,7 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {HistoryService} from "../history.service";
 import {UserService} from "../user.service";
 import {CalendarService} from "../calendar.service";
-import {MatSelect} from "@angular/material/select";
 import {ConfirmComponent} from "../confirm/confirm.component";
 import {ChangeDataService} from "../changeData.service";
 
@@ -12,26 +11,68 @@ import {ChangeDataService} from "../changeData.service";
   styleUrls: ['./prenotazioni-page.component.css']
 })
 export class PrenotazioniPageComponent implements OnInit {
+  readonly OPTIONS: string[] = ['giorno', 'nome', 'zona'];
+  verso: string = 'downward';
+  value: string = this.OPTIONS[0];
   iconSearch: string = 'search';
   filter: string = '';
-  password: string = '';
 
-  constructor(public history: HistoryService, public user: UserService, public calendar: CalendarService, public cds: ChangeDataService) { }
+  history: any[] = [];
+
+  constructor(public hs: HistoryService, public user: UserService, public calendar: CalendarService, public cds: ChangeDataService) { }
 
   ngOnInit(): void {
-    this.history.events = [{ }]; // oggetto a caso dentro per non far comparire la scritta 'Non hai ancora effettuato alcuna prenotazione'
-    this.user.getHistory().subscribe(res => {
-      this.history.events = res.history;
-      this.history.events.forEach(e => e.opened = false);
-      this.history.sort();
-    });
-    this.user.getData().subscribe(res => this.password = res.password);
+    this.history = this.hs.events;
+    this.sort();
+  }
+
+  sort(): void {
+    let newArr: any[] = [];
+    for(let v of this.history) {
+      if (this.calendar.dateToInt(this.calendar.stringToDate(v.day)) >= this.calendar.dateToInt(new Date()) && v.action == 1)
+        newArr.push(v);
+    }
+
+    if(this.value == 'giorno')
+      for(let i = 1; i < newArr.length; i ++)
+        for(let j = 0; j < i; j ++) {
+          let n_i = this.calendar.dateToInt(this.calendar.stringToDate(newArr[i].day));
+          let n_j = this.calendar.dateToInt(this.calendar.stringToDate(newArr[j].day))
+          if(((n_i < n_j || (n_i == n_j && this.calendar.timeToInt(newArr[i].time.split(' - ')[0]) < this.calendar.timeToInt(newArr[j].time.split(' - ')[0]))) && this.verso == 'downward') ||
+            ((n_i > n_j || (n_i == n_j && this.calendar.timeToInt(newArr[i].time.split(' - ')[0]) > this.calendar.timeToInt(newArr[j].time.split(' - ')[0]))) && this.verso == 'upward')) {
+            let t = JSON.parse(JSON.stringify(newArr[i]));
+            newArr[i] = newArr[j];
+            newArr[j] = t;
+          }
+        }
+    else {
+      let key = this.value == 'nome'? 'room': 'zone';
+      newArr.sort((a: any, b: any) => a[key].localeCompare(b[key], undefined, { numeric: true, sensitivity: 'base' }));
+      if(this.verso === 'upward')
+        newArr.reverse();
+    }
+
+    let nUp = 0; // numero di fissi già messi sopra
+    for(let i = 0; i < newArr.length; i ++)
+      if(newArr[i].secured == 1) {
+        let t = JSON.parse(JSON.stringify(newArr[i]));
+        for(let j = i - 1; j >= nUp; j --) {
+          newArr[j + 1] = newArr[j];
+        }
+        newArr[nUp] = t;
+        nUp ++;
+      }
+
+    this.history = newArr;
   }
 
   segnaGiaLetto(el: any): void {
     if(el.visualized == 0)
-      this.user.segnaGiaLetto(el.id).subscribe(res => {
-        el.visualized = res.success == true;  // non posso mettere el.visualized = res.success perché res.success potrebbe essere undefined
+      this.user.segnaGiaLetto(el.id, el.room, el.zone, el.day, el.time).subscribe(res => {
+        if(res.success) {
+          el.visualized = true;
+          this.hs.notifications --;
+        }
       });
   }
 
@@ -40,37 +81,40 @@ export class PrenotazioniPageComponent implements OnInit {
     ev.opened = !ev.opened;
   }
 
-  fissa(ev: any): void {
-    this.user.changeSecured(ev.id, ev.secured).subscribe(res => {
-      ev.secured = !ev.secured;
-      this.history.sort();
+  fissa(el: any): void {
+    this.user.changeSecured(el.id, el.secured, el.room, el.zone, el.day, el.time).subscribe(() => {
+      el.secured = !el.secured;
+      this.sort();
     });
   }
 
   changeWard(): void {
-    this.history.verso = this.history.verso == 'upward'? 'downward': 'upward';
-    this.history.sort();
+    this.verso = this.verso == 'upward'? 'downward': 'upward';
+    this.sort();
   }
 
   changeValue(newValue: string): void {
-    if(this.history.value != newValue) {
-      this.history.value = newValue;
-      this.history.verso = 'downward';
-      this.history.sort();
+    if(this.value != newValue) {
+      this.value = newValue;
+      this.verso = 'downward';
+      this.sort();
     }
   }
 
   delete(el: any): void {
     this.cds.dialog = this.cds.Dialog.open(ConfirmComponent, {
       data: {
-        password: this.password,
         next: () => {
-          this.user.removeEvent(el.id).subscribe(() => {
-            let ind = this.history.events.indexOf(el);
-            for(let i = ind + 1; i < this.history.events.length; i ++)
-              this.history.events[i - 1] = this.history.events[i];
-            this.history.events.pop();
-            this.history.sort();
+          this.user.removeEvent(el.id, el.room, el.zone, el.day, el.time).subscribe(() => {
+            let ind = this.history.indexOf(el);
+            for(let i = ind + 1; i < this.history.length; i ++)
+              this.history[i - 1] = this.history[i];
+            this.history.pop();
+            this.sort();
+
+            this.hs.notifications ++; // notifica cancellazione evento
+            if(!el.visualized)
+              this.hs.notifications --;
           });
         }
       }

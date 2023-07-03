@@ -37,6 +37,7 @@ import { MiePrenotazioniPipe } from './mie-prenotazioni.pipe';
 import {MatBadgeModule} from "@angular/material/badge";
 import {MatSelectModule} from "@angular/material/select";
 import { NotifichePageComponent } from './notifiche-page/notifiche-page.component';
+import { VisNotificationsPipe } from './vis-notifications.pipe';
 
 @NgModule({
   declarations: [
@@ -53,7 +54,8 @@ import { NotifichePageComponent } from './notifiche-page/notifiche-page.componen
     PointInCalendarComponent,
     PrenotazioniPageComponent,
     MiePrenotazioniPipe,
-    NotifichePageComponent
+    NotifichePageComponent,
+    VisNotificationsPipe
   ],
     imports: [
         BrowserModule,

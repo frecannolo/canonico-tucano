@@ -6,6 +6,7 @@ let session = require('express-session');
 let bodyParser = require('body-parser');
 let fs = require('fs');
 let multiparty = require('connect-multiparty');
+const {set} = require("express/lib/application");
 
 const PORT = 3000;
 const URL = 'http://localhost:' + PORT;
@@ -381,11 +382,21 @@ router.get('/books/getBook', function(req, res) {
         connection.query(`SELECT * FROM history WHERE day='${day}' && time='${time}' && action=1;`, function(err, data) {
             if(err)
                 res.json({ data: [] });
-            else
-               res.json({ data: data });
+            else {
+                data.filter(d => {
+                    connection.query(`SELECT * FROM history WHERE idHistory=${d.id};`, function(err, data) {
+                        if(!err && data.length === 0)
+                            return d;
+                        else
+                            return null;
+                    });
+                });
+                console.log(data);
+                res.json({ data: data });
+            }
         });
     }
-});
+}); // maybe unused
 
 router.get('/books/saveBook', function(req, res) {
     if(req.session.idUser === undefined)
@@ -394,18 +405,21 @@ router.get('/books/saveBook', function(req, res) {
         const { name, zone, day, time, reason } = req.query;
         let d = new Date();
         let s = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} alle ${d.getHours()}:${d.getMinutes()}`;
-        connection.query(`INSERT INTO history(action, room, zone, day, time, date, user, reason, visualized, secured) VALUES(1, '${name}', '${zone}', '${day}', '${time}', '${s}', ${req.session.idUser}, '${reason}', 0, 0);`);
+        connection.query(`INSERT INTO history(action, room, zone, day, time, date, user, reason, visualized, secured, canceled) VALUES(1, '${name}', '${zone}', '${day}', '${time}', '${s}', ${req.session.idUser}, '${reason}', 0, 0, 0);`);
 
         res.json({
             success: true,
             save: {
-                name: name,
+                room: name,
                 zone: zone,
                 day: day,
                 time: time,
                 user: req.session.idUser,
                 reason: reason,
-                date_booking: s
+                date: s,
+                visualized: 0,
+                secured: 0,
+                action: 1
             }
         });
     }
@@ -419,8 +433,24 @@ router.get('/books/getBooks', function(req, res) {
         connection.query(`SELECT * FROM history WHERE room='${name}' && zone='${zone}' && action=1;`, function(err, data) {
            if(err)
                res.json({ data: [] });
-           else
-               res.json({ data: data });
+           else {
+               let n1 = 0, n2 = data.length;
+               data.filter(d => {
+                   connection.query(`SELECT * FROM history WHERE idHistory=${d.id};`, function(err, data) {
+                       n1 ++;
+                       if(!err && data.length === 0)
+                           return d;
+                       else
+                           return null;
+                   });
+               });
+               let int = setInterval(function() {
+                   if(n1 === n2) {
+                       clearInterval(int);
+                       res.json({data: data});
+                   }
+               }, 3);
+           }
         });
     }
 });
@@ -445,7 +475,7 @@ router.get('/account/get-history', function(req, res) {
            if(err)
                res.json({ history: [] });
            else
-               res.json({ history: data });
+               res.json({ history: data.filter(d => !Boolean(d.canceled)) });
         });
 });
 
@@ -453,8 +483,25 @@ router.get('/my-books/segna-gia-letto', function(req, res) {
     if (req.session.idUser === undefined)
         res.json({ });
     else {
-        connection.query(`UPDATE history SET visualized=1 WHERE id=${req.query.id}`);
-        res.json({ success: true });
+        let { id, room, zone, day, time } = req.query;
+
+        if(id === undefined)
+            connection.query(`SELECT * FROM history WHERE room='${room}' && zone='${zone}' && day='${day}' && time='${time}' && action=1;`, function (err, data) {
+                data.forEach(d => {
+                    connection.query(`SELECT * FROM history WHERE idHistory=${d.id}`, function (err, data) {
+                        if (data.length === 0)
+                            id = d.id;
+                    });
+                });
+            });
+
+        let int = setInterval(function() {
+            if(id !== undefined) {
+                connection.query(`UPDATE history SET visualized=1 WHERE id=${id}`);
+                clearInterval(int);
+                res.json({success: true});
+            }
+        }, 5);
     }
 });
 
@@ -462,9 +509,25 @@ router.get('/my-books/change-secured', function(req, res) {
     if (req.session.idUser === undefined)
         res.json({ });
     else {
-        const { id, value } = req.query;
-        connection.query(`UPDATE history SET secured=${value} WHERE id=${id}`);
-        res.json({ success: true });
+        let { id, value, room, zone, day, time } = req.query;
+
+        if (id === undefined)
+            connection.query(`SELECT * FROM history WHERE room='${room}' && zone='${zone}' && day='${day}' && time='${time}' && action=1;`, function (err, data) {
+                data.forEach(d => {
+                    connection.query(`SELECT * FROM history WHERE idHistory=${d.id}`, function (err, data) {
+                        if (data.length === 0)
+                            id = d.id;
+                    });
+                });
+            });
+
+        let int = setInterval(function () {
+            if (id !== undefined) {
+                connection.query(`UPDATE history SET secured=${value} WHERE id=${id}`);
+                clearInterval(int);
+                res.json({success: true});
+            }
+        });
     }
 });
 
@@ -472,9 +535,52 @@ router.get('/my-books/delete-book', function(req, res) {
     if (req.session.idUser === undefined)
         res.json({ });
     else {
-        connection.query(`DELETE FROM history WHERE id=${req.query.id}`);
-        res.json({ success: true });
+        let { id, room, zone, day, time } = req.query;
+
+        if (id === undefined)
+            connection.query(`SELECT * FROM history WHERE room='${room}' && zone='${zone}' && day='${day}' && time='${time}' && action=1;`, function (err, data) {
+                data.forEach(d => {
+                    connection.query(`SELECT * FROM history WHERE idHistory=${d.id}`, function (err, data) {
+                        if (data.length === 0)
+                            id = d.id;
+                    });
+                });
+            });
+
+        let date = new Date();
+        let s = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} alle ${date.getHours()}:${date.getMinutes()}`;
+        let int = setInterval(function() {
+            if(id !== undefined) {
+                connection.query(`INSERT INTO history(action, room, zone, day, time, date, user, visualized, idHistory, canceled) VALUES(2, '${room}', '${zone}', '${day}', '${time}', '${s}', ${req.session.idUser}, 0, ${id}, 0);`);
+                res.json({ success: true });
+                clearInterval(int);
+            }
+        }, 5);
     }
-})
+});
+
+router.get('/account/clear-history', function(req, res) {
+    if (req.session.idUser === undefined)
+        res.json({ });
+    else {
+        connection.query(`SELECT * FROM history WHERE user=${req.session.idUser} && action=2`, function(err, data) {
+            let n1 = 0, n2 = data.length;
+            data.forEach(d => {
+                console.log(d);
+                connection.query(`DELETE FROM history WHERE id=${d.idHistory}`);
+                n1 ++;
+            });
+            let int = setInterval(function() {
+                if(n1 === n2) {
+                    connection.query(`DELETE FROM history WHERE user=${req.session.idUser} && action=2`);
+                    connection.query(`UPDATE history SET canceled=1 WHERE user=${req.session.idUser} && action=1`);
+                    clearInterval(int);
+                    res.json({ success: true });
+
+                }
+            }, 3);
+        });
+    }
+});
 
 app.listen(PORT);

@@ -2,6 +2,7 @@ import {Component, HostListener, Input, OnInit} from '@angular/core';
 import {UserService} from '../user.service';
 import {CalendarService} from "../calendar.service";
 import {PagesService} from "../pages.service";
+import {HistoryService} from "../history.service";
 
 @Component({
   selector: 'app-books-room',
@@ -35,7 +36,7 @@ export class BooksRoomComponent implements OnInit {
   requests: any[] = [];
   books: any[] = [];
 
-  constructor(public user: UserService, public calendar: CalendarService, public pages: PagesService) {
+  constructor(public user: UserService, public calendar: CalendarService, public pages: PagesService, public history: HistoryService) {
     let start = this.START, finish = false;
     const [hg, mg] = this.GAP.split(':');
     const [HE, ME] = this.FINISH.split(':');
@@ -178,7 +179,12 @@ export class BooksRoomComponent implements OnInit {
       .subscribe(res => {
         if(res.success) {
           this.remove(el);
+          let [d, cong, t] = res.save.date.split(' ');
+          res.save.date = this.calendar.dateToString(this.calendar.stringToDate(d)) + ' ' + cong + ' ' + this.calendar.intToTime(this.calendar.timeToInt(t)); // per formattare la data
           this.books.push(res.save);
+
+          this.history.events.push(res.save);
+          this.history.notifications ++;
         }
       });
   }

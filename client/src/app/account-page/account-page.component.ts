@@ -1,9 +1,9 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, HostListener, OnInit} from '@angular/core';
 import {UserService} from '../user.service';
-import {MatDialog} from "@angular/material/dialog";
 import {ConfirmComponent} from "../confirm/confirm.component";
-import {FormControl, Validators} from "@angular/forms";
 import {ChangeDataService} from "../changeData.service";
+import {HistoryService} from "../history.service";
+import {CalendarService} from "../calendar.service";
 
 const DATA_TO_CONFIRM = ['email', 'password'];
 const REGEX_PASSW: RegExp = /^(=?.*[A-Z])(?=.*[0-9])[a-zA-Z0-9!?]{8,}$/;
@@ -18,6 +18,9 @@ export class AccountPageComponent implements OnInit {
   data: any[] = [];
   startData: any;
   notImageInserted: boolean = false;
+  nPrenotazioni: number = 0;
+  historyOpened: boolean = false;
+  history: any[] = [];
 
   regexes: any = {
     email: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
@@ -25,7 +28,7 @@ export class AccountPageComponent implements OnInit {
     username: REGEX_USERN
   }
 
-  constructor(public user: UserService, public cds: ChangeDataService) { }
+  constructor(public user: UserService, public cds: ChangeDataService, public hs: HistoryService, public calendar: CalendarService) { }
 
   ngOnInit(): void {
     this.user.getData().subscribe(res => {
@@ -42,6 +45,26 @@ export class AccountPageComponent implements OnInit {
           regex: this.regexes[key]
         });
     });
+
+    this.nPrenotazioni = this.hs.events.filter(ev => ev.action == 1).length;
+    this.history = this.hs.events;
+    this.set();
+  }
+
+  set(): void {
+    this.history.forEach(ev => {
+      ev.content1 = `${ev.action == 1 ? 'prenotazione' : 'cancellazione evento'} | stanza: ${ev.room}`;
+      ev.content2 = this.calendar.getCompleteDateFormatted(ev.date);
+      ev.iconToggle = 'event';
+      ev.iconAndClass = ev.action == 1 ? 'done' : 'close';
+    });
+  }
+
+  toggle(ev: any): void {
+    ev.iconToggle = ev.iconToggle == 'event'? 'description': 'event';
+    let t = ev.content1;
+    ev.content1 = ev.content2;
+    ev.content2 = t;
   }
 
   editOrSave(el: any, input: HTMLInputElement): void {
@@ -106,9 +129,28 @@ export class AccountPageComponent implements OnInit {
 
     this.cds.dialog = this.cds.Dialog.open(ConfirmComponent, {
       data: {
-        password: this.startData.password,
         next: this.cds.setMessages
       }
     });
+  }
+
+  clearHistory(): void {
+    this.cds.dialog = this.cds.Dialog.open(ConfirmComponent, {
+      data: {
+        next: () => {
+          this.user.clearHistory().subscribe(() => {
+            this.hs.events = [];
+            this.history = [];
+            this.hs.notifications = 0;
+          });
+        }
+      }
+    });
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(): void {
+    if(window.innerWidth > 500)
+      this.set();
   }
 }

@@ -11,16 +11,16 @@
     <div>
       <mat-form-field>
         <mat-label>Ordina per</mat-label>
-        <mat-select disableRipple [value]="history.value">
-          <mat-option *ngFor="let opt of history.OPTIONS" [value]="opt" (click)="changeValue(opt)">{{opt}}</mat-option>
+        <mat-select disableRipple [value]="value">
+          <mat-option *ngFor="let opt of OPTIONS" [value]="opt" (click)="changeValue(opt)">{{opt}}</mat-option>
         </mat-select>
       </mat-form-field>
-      <button mat-icon-button (click)="changeWard()" id="up-down"><mat-icon>arrow_{{history.verso}}</mat-icon></button>
+      <button mat-icon-button (click)="changeWard()" id="up-down"><mat-icon>arrow_{{verso}}</mat-icon></button>
     </div>
   </div>
 
-  <div id="not-fixed" class="cards" [style]="'margin-bottom: ' + (history.events.length == 0? '0': '70px')">
-    <div class="card" *ngFor="let ev of history.events | miePrenotazioni:filter" [matBadge]="ev.visualized? '': '1'" matBadgeColor="accent" matBadgePosition="before">
+  <div id="not-fixed" class="cards" [style]="'margin-bottom: ' + (history.length == 0? '0': '70px')">
+    <div class="card" *ngFor="let ev of history | miePrenotazioni:filter" [matBadge]="ev.visualized? '': '1'" matBadgeColor="accent" matBadgePosition="before">
       <div class="infos">
         <mat-icon *ngIf="ev.secured" class="secured-icon">push_pin</mat-icon>
 
@@ -60,5 +60,6 @@
     </div>
   </div>
 
-  <p id="message" *ngIf="history.events.length == 0">Non hai ancora effettuato alcuna prenotazione</p>
+  <p class="message" *ngIf="history.length == 0">Non hai ancora effettuato alcuna prenotazione</p>
+  <p class="message" *ngIf="history.length > 0 && (history | miePrenotazioni:filter).length == 0">Non hai nessuna prenotazione da cercare con "{{filter}}"</p>
 </div>

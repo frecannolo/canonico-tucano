@@ -23,6 +23,7 @@ button {
   padding: 25px 10px;
   color: #673ab7;
   border-radius: 10px;
+  flex-direction: row;
 }
 
 button mat-icon {
@@ -32,10 +33,22 @@ button mat-icon {
   color: #673ab7;
 }
 
-#void {
+.void {
   flex: 1 1 auto;
 }
 
 .selected {
   background-color: #ffd740;
+}
+
+#n-notif {
+  width: 24px;
+  height: 24px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: #673ab7;
+  color: #ffd740;
 }

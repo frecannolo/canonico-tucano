@@ -1,65 +1,93 @@
-<div id="div-photo">
-  <mat-icon id="icon-no-foto" *ngIf="user.photo == null">account_circle</mat-icon>
-  <img *ngIf="user.photo != null" [src]="user.photo">
+<div id="content" *ngIf="!historyOpened">
+  <div id="div-photo">
+    <mat-icon id="icon-no-foto" *ngIf="user.photo == null">account_circle</mat-icon>
+    <img *ngIf="user.photo != null" [src]="user.photo">
 
-  <button mat-icon-button [matMenuTriggerFor]="aboveMenu" id="button-menu"><mat-icon>more_vert</mat-icon></button>
-  <mat-menu #aboveMenu="matMenu" yPosition="above">
-    <button class="button-image-settings" mat-menu-item id="change-photo" (click)="imageProfile.click()">
-      <input type="file" #imageProfile hidden (change)="setNewPhoto($event)"><mat-icon>change_circle</mat-icon>Cambia</button>
-    <button class="button-image-settings" mat-menu-item id="remove-photo" [disabled]="user.photo == null" (click)="removePhoto()"><mat-icon>delete</mat-icon>Elimina</button>
-  </mat-menu>
-</div>
-
-<div id="error" *ngIf="notImageInserted">
-  <div></div> <!-- serve solo per mettere la scritta in mezzo -->
-  <p id="error-image">Il file caricato non è un'immagine</p>
-  <mat-icon (click)="notImageInserted = false">close</mat-icon>
-</div>
-
-<div id="change-data">
-  <div *ngFor="let d of data" class="data">
-    <div class="p-input-container" [ngStyle]="{ 'justify-content': d.icon == 'edit'? 'left': 'space-between' }">
-      <p class="name">{{d.name + ':'}}&nbsp;</p>
-      <mat-form-field [ngStyle]="{ 'display': d.icon == 'save'? 'block': 'none' }" appearance="outline"> <!-- non c'è l'*ngIf perché sennò non va il button sotto -->
-        <mat-label>{{d.name}}</mat-label>
-        <input #input matInput [value]="d.value" id="input-to-reduce" required>
-      </mat-form-field>
-      <p class="value" *ngIf="d.icon == 'edit'" (dblclick)="edit(d, input)">{{d.value}}</p>
-    </div>
-    <div class="icon-container">
-      <button color="primary" (click)="editOrSave(d, input)" mat-icon-button><mat-icon>{{d.icon}}</mat-icon></button>
-      <mat-icon *ngIf="d.needEmail" class="icon-mail" matTooltip="dovrai confermare le eventuali modifiche via mail">info</mat-icon>
-      <div class="void" *ngIf="!d.needEmail"></div>
-    </div>
+    <button mat-icon-button [matMenuTriggerFor]="aboveMenu" id="button-menu"><mat-icon>more_vert</mat-icon></button>
+    <mat-menu #aboveMenu="matMenu" yPosition="above">
+      <button class="button-image-settings" mat-menu-item id="change-photo" (click)="imageProfile.click()">
+        <input type="file" #imageProfile hidden (change)="setNewPhoto($event)"><mat-icon>change_circle</mat-icon>Cambia</button>
+      <button class="button-image-settings" mat-menu-item id="remove-photo" [disabled]="user.photo == null" (click)="removePhoto()"><mat-icon>delete</mat-icon>Elimina</button>
+    </mat-menu>
   </div>
 
-  <div id="buttons">
-    <button mat-raised-button color="accent" [disabled]="buttonChangesDisabled()" (click)="open()"><mat-icon>published_with_changes</mat-icon>Salva le modifiche</button>
-    <button mat-raised-button color="warn" [disabled]="buttonChangesDisabled()"><mat-icon>restart_alt</mat-icon>Reset</button>
+  <div id="error" *ngIf="notImageInserted">
+    <div></div> <!-- serve solo per mettere la scritta in mezzo -->
+    <p id="error-image">Il file caricato non è un'immagine</p>
+    <mat-icon (click)="notImageInserted = false">close</mat-icon>
   </div>
 
-  <div id="alerts" *ngIf="cds.messages.length > 0">
-    <div *ngFor="let mess of cds.messages" class="div-messages" [ngStyle]="{ 'display': mess.visible? 'flex': 'none' }">
-      <div [ngStyle]="{ 'color': mess.color }">
-        <mat-icon>{{mess.icon}}</mat-icon>
-        <p>{{mess.text}}</p>
+  <div id="change-data">
+    <div *ngFor="let d of data" class="data">
+      <div class="p-input-container" [ngStyle]="{ 'justify-content': d.icon == 'edit'? 'left': 'space-between' }">
+        <p class="name">{{d.name + ':'}}&nbsp;</p>
+        <mat-form-field [ngStyle]="{ 'display': d.icon == 'save'? 'block': 'none' }" appearance="outline"> <!-- non c'è l'*ngIf perché sennò non va il button sotto -->
+          <mat-label>{{d.name}}</mat-label>
+          <input #input matInput [value]="d.value" id="input-to-reduce" required>
+        </mat-form-field>
+        <p class="value" *ngIf="d.icon == 'edit'" (dblclick)="edit(d, input)">{{d.value}}</p>
       </div>
-      <mat-icon (click)="mess.visible = false">close</mat-icon>
+      <div class="icon-container">
+        <button color="primary" (click)="editOrSave(d, input)" mat-icon-button><mat-icon>{{d.icon}}</mat-icon></button>
+        <mat-icon *ngIf="d.needEmail" class="icon-mail" matTooltip="dovrai confermare le eventuali modifiche via mail">info</mat-icon>
+        <div class="void" *ngIf="!d.needEmail"></div>
+      </div>
+    </div>
+
+    <div id="buttons">
+      <button mat-raised-button color="accent" [disabled]="buttonChangesDisabled()" (click)="open()"><mat-icon>published_with_changes</mat-icon>Salva le modifiche</button>
+      <button mat-raised-button color="warn" [disabled]="buttonChangesDisabled()"><mat-icon>restart_alt</mat-icon>Reset</button>
+    </div>
+
+    <div id="alerts" *ngIf="cds.messages.length > 0">
+      <div *ngFor="let mess of cds.messages" class="div-messages" [ngStyle]="{ 'display': mess.visible? 'flex': 'none' }">
+        <div [ngStyle]="{ 'color': mess.color }">
+          <mat-icon>{{mess.icon}}</mat-icon>
+          <p>{{mess.text}}</p>
+        </div>
+        <mat-icon (click)="mess.visible = false">close</mat-icon>
+      </div>
     </div>
   </div>
+
+  <div id="div-history">
+    <div id="n-prenotazioni">
+      <p class="name">prenotazioni totali:&nbsp;</p>
+      <p class="value" id="clickable">{{nPrenotazioni}}</p>
+    </div>
+    <div id="buttons-history">
+      <button mat-button (click)="historyOpened = true;"><mat-icon>history</mat-icon>cronologia</button>
+      <button mat-raised-button color="warn" (click)="clearHistory()"><mat-icon>backspace</mat-icon>cancella cronologia</button>
+    </div>
+  </div>
+
+  <div id="container-final-button">
+    <button mat-raised-button color="warn"><mat-icon>delete_forever</mat-icon>Elimina account</button>
+  </div>
 </div>
 
-<div id="div-history">
-  <div id="n-prenotazioni">
-    <p class="name">prenotazioni totali:&nbsp;</p>
-    <p class="value" id="clickable">[[prenotazioni]]</p>
+<div id="history" *ngIf="historyOpened">
+  <div id="header">
+    <div id="void"></div>
+    <p id="title">Cronologia</p>
+    <button mat-icon-button (click)="historyOpened = false" color="warn"><mat-icon>close</mat-icon></button>
   </div>
-  <div id="buttons-history">
-    <button mat-button><mat-icon>history</mat-icon>cronologia</button>
-    <button mat-raised-button color="warn"><mat-icon>backspace</mat-icon>cancella cronologia</button>
-  </div>
-</div>
 
-<div id="container-final-button">
-  <button mat-raised-button color="warn"><mat-icon>delete_forever</mat-icon>Elimina account</button>
+  <div class="notifications" *ngIf="history.length > 0">
+    <div *ngFor="let ev of history" class="notif">
+      <div>
+        <mat-icon [class]="ev.iconAndClass">{{ev.iconAndClass}}</mat-icon>
+        <p>{{ev.content1}}</p>
+      </div>
+      <p>{{ev.content2}}</p>
+      <button mat-icon-button class="icon-toggle" (click)="toggle(ev)"><mat-icon>{{ev.iconToggle}}</mat-icon></button>
+    </div>
+  </div>
+  <p id="message" *ngIf="history.length == 0">La tua cronologia è vuota</p>
+
+  <mat-divider></mat-divider>
+
+  <div id="back">
+    <button mat-button color="warn" (click)="historyOpened = false">TORNA INDIETRO</button>
+  </div>
 </div>

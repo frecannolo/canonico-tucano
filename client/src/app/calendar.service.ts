@@ -68,6 +68,11 @@ export class CalendarService {
     return this.dateToString(this.stringToDate(date)) + ' ' + cong + ' ' + this.intToTime(this.timeToInt(hour));
   }
 
+  getCompleteDateFormatted(date: string): string {
+    let [d, cong, t] = date.split(' ');
+    return this.dateToString(this.stringToDate(d)) + ' ' + cong + ' ' + this.intToTime(this.timeToInt(t));
+  }
+
   cancelAll(): void {
     for(let key in this.selected) {
       if(this.selected[key] != null) {

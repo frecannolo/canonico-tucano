@@ -1,1 +1,50 @@
-<p>notifiche-page works!</p>
+<div id="container">
+  <div id="inputs">
+    <div id="options">
+        <mat-checkbox class="option" #Prenotazioni checked>prenotazioni</mat-checkbox>
+        <mat-checkbox class="option" #Cancellazioni checked>cancellazioni</mat-checkbox>
+    </div>
+    <div id="last-n-days">
+      <mat-checkbox class="option" #Active></mat-checkbox>
+      <mat-form-field>
+        <span matPrefix>&nbsp;&nbsp;ultimi&nbsp;</span>
+        <input #Giorni type="number" min="0" matInput value="1" [disabled]="!Active.checked">
+        <span matSuffix>&nbsp;giorni&nbsp;&nbsp;</span>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <div id="notifications">
+    <div *ngFor="let not of notifications | visNotifications:{
+    prenotazioni: Prenotazioni.checked,
+    cancellazioni: Cancellazioni.checked,
+    active: Active.checked,
+    giorni: Giorni.value
+    }" class="notif" [matBadge]="1" matBadgeColor="accent" [matBadgeHidden]="not.visualized">
+      <div>
+        <mat-icon [class]="not.iconAndClass">{{not.iconAndClass}}</mat-icon>
+        <p>{{not.content1}}</p>
+      </div>
+      <p>{{not.content2}}</p>
+      <button mat-icon-button class="icon-toggle" (click)="toggle(not)"><mat-icon>{{not.iconToggle}}</mat-icon></button>
+    </div>
+  </div>
+
+  <p class="message" *ngIf="(notifications | visNotifications:{
+    prenotazioni: Prenotazioni.checked,
+    cancellazioni: Cancellazioni.checked,
+    active: Active.checked,
+    giorni: Giorni.value
+    }).length == 0 && notifications.length > 0">Non è presente nessuna notifica che rispetti i parametri scelti</p>
+  <p class="message" *ngIf="notifications.length == 0">Non hai notifiche</p>
+</div>
+
+<!--
+ | visNotifications: {
+      only_news: OnlyNews.checked,
+      prenotazioni: Prenotazioni.checked,
+      cancellazioni: Cancellazioni.checked,
+      active_search: Active.checked,
+      giorni: parseInt(Giorni.value)
+    }"
+-->
