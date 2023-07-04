@@ -391,7 +391,6 @@ router.get('/books/getBook', function(req, res) {
                             return null;
                     });
                 });
-                console.log(data);
                 res.json({ data: data });
             }
         });
@@ -435,19 +434,18 @@ router.get('/books/getBooks', function(req, res) {
                res.json({ data: [] });
            else {
                let n1 = 0, n2 = data.length;
-               data.filter(d => {
+               let toRet = [];
+               data.forEach(d => {
                    connection.query(`SELECT * FROM history WHERE idHistory=${d.id};`, function(err, data) {
-                       n1 ++;
                        if(!err && data.length === 0)
-                           return d;
-                       else
-                           return null;
-                   });
-               });
+                           toRet.push(d);
+                       n1 ++;
+                   })
+               })
                let int = setInterval(function() {
                    if(n1 === n2) {
                        clearInterval(int);
-                       res.json({data: data});
+                       res.json({data: toRet});
                    }
                }, 3);
            }
@@ -566,7 +564,6 @@ router.get('/account/clear-history', function(req, res) {
         connection.query(`SELECT * FROM history WHERE user=${req.session.idUser} && action=2`, function(err, data) {
             let n1 = 0, n2 = data.length;
             data.forEach(d => {
-                console.log(d);
                 connection.query(`DELETE FROM history WHERE id=${d.idHistory}`);
                 n1 ++;
             });

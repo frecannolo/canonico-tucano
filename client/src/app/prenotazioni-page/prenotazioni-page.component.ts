@@ -22,14 +22,25 @@ export class PrenotazioniPageComponent implements OnInit {
   constructor(public hs: HistoryService, public user: UserService, public calendar: CalendarService, public cds: ChangeDataService) { }
 
   ngOnInit(): void {
-    this.history = this.hs.events;
-    this.sort();
+    this.user.getHistory().subscribe(res => {
+      this.history = res.history;
+      this.history.filter(event => event.action == 2).forEach(event => {
+        for(let i = 0; i < this.history.length; i ++)
+          if(event.idHistory == this.history[i].id) {
+            for(let j = i + 1; j < this.history.length; j++)
+              this.history[j - 1] = this.history[j];
+            this.history.pop();
+          }
+      });
+      this.history = this.history.filter(event => event.action == 1);
+      this.sort();
+    });
   }
 
   sort(): void {
     let newArr: any[] = [];
     for(let v of this.history) {
-      if (this.calendar.dateToInt(this.calendar.stringToDate(v.day)) >= this.calendar.dateToInt(new Date()) && v.action == 1)
+      if (this.calendar.dateToInt(this.calendar.stringToDate(v.day)) >= this.calendar.dateToInt(new Date()))
         newArr.push(v);
     }
 

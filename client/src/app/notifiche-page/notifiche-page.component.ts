@@ -40,12 +40,12 @@ export class NotifichePageComponent implements OnInit {
     });
 
     let i = this.notifications.length - 1;
-    let n_0 = this.calendar.dateToInt(this.calendar.stringToDate(this.notifications[0].date.split(' ')[0])),
-      n_i = this.calendar.dateToInt(this.calendar.stringToDate(this.notifications[i].date.split(' ')[0]))
-    if (i > -1 &&
-      (n_0 < n_i ||
-        (n_0 == n_i && this.calendar.timeToInt(this.notifications[0].date.split(' ')[2]) < this.calendar.timeToInt(this.notifications[i].date.split(' ')[2]))))
-      this.notifications.reverse();
+    if(i > -1) {
+      let n_0 = this.calendar.dateToInt(this.calendar.stringToDate(this.notifications[0].date.split(' ')[0])),
+        n_i = this.calendar.dateToInt(this.calendar.stringToDate(this.notifications[i].date.split(' ')[0]))
+      if (n_0 < n_i || (n_0 == n_i && this.calendar.timeToInt(this.notifications[0].date.split(' ')[2]) < this.calendar.timeToInt(this.notifications[i].date.split(' ')[2])))
+        this.notifications.reverse();
+    }
   }
 
   toggle(not: any): void {

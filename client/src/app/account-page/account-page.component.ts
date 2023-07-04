@@ -46,9 +46,11 @@ export class AccountPageComponent implements OnInit {
         });
     });
 
-    this.nPrenotazioni = this.hs.events.filter(ev => ev.action == 1).length;
-    this.history = this.hs.events;
-    this.set();
+    this.user.getHistory().subscribe(res => {
+      this.history = res.history;
+      this.nPrenotazioni = this.history.filter(ev => ev.action == 1).length;
+      this.set();
+    });
   }
 
   set(): void {
@@ -142,6 +144,7 @@ export class AccountPageComponent implements OnInit {
             this.hs.events = [];
             this.history = [];
             this.hs.notifications = 0;
+            this.nPrenotazioni = 0;
           });
         }
       }

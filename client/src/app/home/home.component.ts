@@ -28,13 +28,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     this.history.events = [];
     this.history.notifications = 0;
-    this.user.getHistory().subscribe(res => {
-      this.history.events = res.history;
-      this.history.events.forEach(e => {
-        if(!e.visualized)
-          this.history.notifications ++;
-      })
-    });
+    this.user.getHistory().subscribe(res => this.history.notifications = res.history.filter((e: any) => !Boolean(e.visualized)));
   }
 
   ngOnDestroy(): void {
