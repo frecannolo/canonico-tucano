@@ -3,7 +3,7 @@
 <div id="username">
   <mat-icon *ngIf="user.photo == null">account_circle</mat-icon>
   <img id="user-image" *ngIf="user.photo != null" [src]="user.photo">
-  <p id="p-username" (click)="pages.page = 'account'">{{username}}</p>
+  <p id="p-username" (click)="pages.page = 'account'">{{user.username}}</p>
 </div>
 
 <div id="div-name" *ngIf="width >= 700">

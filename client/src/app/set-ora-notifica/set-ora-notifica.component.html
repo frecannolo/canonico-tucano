@@ -1,0 +1,28 @@
+<div id="container">
+  <div id="header">
+    <p>Scegli l'anticipo</p>
+    <mat-icon (click)="cds.dialog.close()">close</mat-icon>
+  </div>
+
+  <div id="content">
+    <mat-form-field appearance="fill">
+      <mat-label>giorni</mat-label>
+      <input #Days matInput type="number" min="0" [value]="pren.time_email == null? '0': pren.time_email.split(' ')[0]">
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+      <mat-label>ore</mat-label>
+      <input #Hours matInput type="number" min="0" [value]="pren.time_email == null? '0': pren.time_email.split(' ')[1]">
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+      <mat-label>minuti</mat-label>
+      <input #Minutes matInput type="number" min="0"[value]="pren.time_email == null? '0': pren.time_email.split(' ')[2]" >
+    </mat-form-field>
+  </div>
+
+  <div id="footer">
+    <button mat-raised-button color="primary" (click)="setEmail(Days, Hours, Minutes)" [disabled]="Days.value + ' ' + Hours.value + ' ' + Minutes.value == pren.time_email || Days.value + ' ' + Hours.value + ' ' + Minutes.value == '0 0 0'">conferma</button>
+    <button mat-raised-button color="warn" (click)="deleteEmail()" [disabled]="pren.id_email == null">cancella email</button>
+  </div>
+
+  <mat-progress-bar *ngIf="load" mode="indeterminate"></mat-progress-bar>
+</div>

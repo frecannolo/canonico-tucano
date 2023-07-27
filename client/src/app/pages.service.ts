@@ -1,20 +1,21 @@
-import {HostListener, Injectable} from "@angular/core";
+import {Injectable} from "@angular/core";
+import {Router} from "@angular/router";
 
 @Injectable({
   providedIn: 'root'
 })
 export class PagesService {
-  readonly TEXT_BUTTONS = ['account', 'prenotazioni', 'prenota', 'notifiche', 'impostazioni'];
-  readonly ICONS = ['person', 'bookmarks', 'search', 'notifications_active', 'settings'];
-  readonly NAME_PAGES = ['account', 'my-bookings', 'books', 'notifications', 'settings'];
-  readonly START_PAGE = this.NAME_PAGES[2];
+  readonly TEXT_BUTTONS = ['account', 'prenotazioni', 'prenota', 'notifiche'];
+  readonly ROUTES = ['account', 'prenotazioni', 'prenota', 'notifiche'];
+  readonly ICONS = ['person', 'bookmarks', 'search', 'notifications_active'];
+  readonly NAME_PAGES = ['account', 'my-bookings', 'books', 'notifications'];
 
-  page: string = this.START_PAGE;
+  page: string = '';
   menuDialog: any = null;
   load: boolean = false;
   divInSearch: string = 'div-1';
 
-  constructor() { }
+  constructor(public router: Router) { }
 
   getButtons(): any[] {
     let ret: any[] = [];
@@ -27,5 +28,9 @@ export class PagesService {
       });
 
     return ret;
+  }
+
+  setPage(route: any): void {
+    this.page = this.NAME_PAGES[this.ROUTES.indexOf(route)];
   }
 }

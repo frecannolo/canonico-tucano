@@ -23,9 +23,9 @@
         <p class="name">{{d.name + ':'}}&nbsp;</p>
         <mat-form-field [ngStyle]="{ 'display': d.icon == 'save'? 'block': 'none' }" appearance="outline"> <!-- non c'è l'*ngIf perché sennò non va il button sotto -->
           <mat-label>{{d.name}}</mat-label>
-          <input #input matInput [value]="d.value" id="input-to-reduce" required>
+          <input #input matInput [value]="d.value" id="input-to-reduce" required [type]="d.type">
         </mat-form-field>
-        <p class="value" *ngIf="d.icon == 'edit'" (dblclick)="edit(d, input)">{{d.value}}</p>
+        <p class="value" *ngIf="d.icon == 'edit'" (dblclick)="edit(d, input)">{{d.type == 'password'? getPasswd(d.value): d.value}}</p>
       </div>
       <div class="icon-container">
         <button color="primary" (click)="editOrSave(d, input)" mat-icon-button><mat-icon>{{d.icon}}</mat-icon></button>
@@ -36,7 +36,7 @@
 
     <div id="buttons">
       <button mat-raised-button color="accent" [disabled]="buttonChangesDisabled()" (click)="open()"><mat-icon>published_with_changes</mat-icon>Salva le modifiche</button>
-      <button mat-raised-button color="warn" [disabled]="buttonChangesDisabled()"><mat-icon>restart_alt</mat-icon>Reset</button>
+      <button mat-raised-button color="warn" [disabled]="buttonChangesDisabled()" (click)="reset()"><mat-icon>restart_alt</mat-icon>Reset</button>
     </div>
 
     <div id="alerts" *ngIf="cds.messages.length > 0">
@@ -62,7 +62,7 @@
   </div>
 
   <div id="container-final-button">
-    <button mat-raised-button color="warn"><mat-icon>delete_forever</mat-icon>Elimina account</button>
+    <button mat-raised-button color="warn" (click)="remAccount()"><mat-icon>delete_forever</mat-icon>Elimina account</button>
   </div>
 </div>
 

@@ -1,4 +1,4 @@
-const par = new URLSearchParams(window.location.search)
+const par = new URLSearchParams(window.location.search);
 const code = par.get('code');
 const type = par.get('name');
 
@@ -26,7 +26,7 @@ confirm.addEventListener('click', function() {
                code: code,
                type: type
             }),
-            contentType:"application/json; charset=utf-8",
+            contentType:'application/json; charset=utf-8',
             success: function(res) {
                doAlways();
                if(res.success)
@@ -34,9 +34,7 @@ confirm.addEventListener('click', function() {
                else
                   failed.style.display = 'block';
             },
-            error: function() {
-               doAlways();
-            }
+            error: doAlways
          });
       }, 1000);
    }

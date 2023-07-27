@@ -6,7 +6,6 @@ let session = require('express-session');
 let bodyParser = require('body-parser');
 let fs = require('fs');
 let multiparty = require('connect-multiparty');
-const {set} = require("express/lib/application");
 
 const PORT = 3000;
 const URL = 'http://localhost:' + PORT;
@@ -108,15 +107,15 @@ router.get('/checkCode', function(req, res) {
     let code = req.query.code;
     let filename;
 
-    connection.query(`SELECT * FROM user WHERE code='${code}' && verified=0;`, function(err, data) {
-       if(data.length === 0)
-           filename = 'codeFailed';
-       else {
-           connection.query(`UPDATE user SET verified=1 WHERE code='${code}';`);
-           filename = 'codeSuccess';
-       }
+    connection.query(`SELECT * FROM user WHERE code='${code}' && verified=0;`, function (err, data) {
+        if (data.length === 0)
+            filename = 'codeFailed';
+        else {
+            connection.query(`UPDATE user SET verified=1 WHERE code='${code}';`);
+            filename = 'codeSuccess';
+        }
 
-       res.sendFile(path.join(__dirname, 'public', 'htmls', filename + '.html'));
+        res.sendFile(path.join(__dirname, 'public', 'htmls', filename + '.html'));
     });
 });
 
@@ -130,29 +129,29 @@ router.get('/logout', function(req, res) {
     res.json({ });
 });
 
-router.get('/account/getUsername', function(req, res) {
+router.get('/account/get-username', function(req, res) {
     if(req.session.idUser === undefined)
         res.json({ });
-
-    connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
-        res.json({ username: data[0].username });
-    });
-});
-
-router.get('/account/getData', function(req, res) {
-    if(req.session.idUser === undefined)
-        res.json({ });
-
-    connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
-        res.json({
-            username: (data[0].username || ''),
-            password: (data[0].password || ''),
-            email: (data[0].email || ''),
+    else
+        connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
+            res.json({ username: data[0].username });
         });
-    });
 });
 
-router.post('/account/newPhoto', multipart, function(req, res) {
+router.get('/account/get-data', function(req, res) {
+    if(req.session.idUser === undefined)
+        res.json({ });
+    else
+        connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
+            res.json({
+                username: data[0].username,
+                password: data[0].password,
+                email: data[0].email
+            });
+        });
+});
+
+router.post('/account/new-photo', multipart, function(req, res) {
     if(req.session.idUser === undefined)
         res.json({ success: false });
 
@@ -177,138 +176,143 @@ router.post('/account/newPhoto', multipart, function(req, res) {
 router.get('/account/getPhoto', function(req, res) {
     if(req.session.idUser === undefined)
         res.json({ });
-
-    connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
-        let username = data[0].username;
-        fs.readdirSync(path.join(__dirname, PATH_UPLOADS)).map(filename => {
-            if(filename.indexOf(username) === 0)
-                res.sendFile(path.join(__dirname, PATH_UPLOADS, filename));
+    else
+        connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
+            let username = data[0].username;
+            fs.readdirSync(path.join(__dirname, PATH_UPLOADS)).map(filename => {
+                if(filename.indexOf(username) === 0)
+                    res.sendFile(path.join(__dirname, PATH_UPLOADS, filename));
+            });
         });
-    });
 });
 
-router.get('/account/srcPhoto', function(req, res) {
+router.get('/account/src-photo', function(req, res) {
     if(req.session.idUser === undefined)
         res.json({ });
+    else
+        connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
+            let username = data[0].username;
+            fs.readdir(path.join(__dirname, PATH_UPLOADS), function(err, files) {
+                if(err)
+                    res.json({ path: null });
 
-    connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
-        let username = data[0].username;
-        fs.readdir(path.join(__dirname, PATH_UPLOADS), function(err, files) {
-            if(err)
-                res.json({ path: null });
+                let inviato = false;
+                files.forEach(f => {
+                    if(f.indexOf(username) === 0 && !inviato  && f[username.length] === '.') {
+                        inviato = true;
+                        res.json({ path: URL + '/account/getPhoto' });
+                    }
+                });
+                if(!inviato)
+                    res.json({ path: null });
+            });
+        });
+});
 
-            let inviato = false;
-            files.forEach(f => {
-                if(f.indexOf(username) === 0 && !inviato  && f[username.length] === '.') {
-                    inviato = true;
-                    res.json({ path: URL + '/account/getPhoto' });
+router.get('/account/rem-photo', function(req, res) {
+    if(req.session.idUser === undefined)
+        res.json({ });
+    else
+        connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
+            let username = data[0].username;
+            let founded = null;
+
+            fs.readdir(path.join(__dirname, PATH_UPLOADS), function(err, files) {
+               if(err)
+                   res.json({ removed: false });
+               files.forEach(f => {
+                   if(f.indexOf(username) === 0 && f[username.length] === '.' && founded == null)
+                       founded = f;
+               });
+
+               if(typeof founded === 'string') {
+                   fs.unlinkSync(path.join(__dirname, PATH_UPLOADS, founded));
+                   res.json({ removed: true });
+               } else
+                   res.json({ removed: false });
+            });
+        });
+});
+
+router.post('/account/email-change-data', function(req, res) {
+    if(req.session.idUser === undefined)
+        res.json({ });
+    else {
+        let {name, value} = req.body;
+        connection.query(`SELECT * FROM newCredential WHERE id=${req.session.idUser};`, function (err, data) {
+            if (data.length === 0)
+                connection.query(`INSERT INTO newCredential(id, ${name}) VALUES(${req.session.idUser}, '${value}')`);
+            else
+                connection.query(`UPDATE newCredential SET ${name}='${value}' WHERE id=${req.session.idUser}`);
+        });
+
+        connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function (err, data) {
+            if (err)
+                res.json({success: false});
+
+            const code = data[0].code;
+            const emailTo = data[0].email;
+            const transporter = mailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: EMAIL,
+                    pass: EMAIL_PASS
                 }
             });
-            if(!inviato)
-                res.json({ path: null });
+
+            fs.readFile(path.join(__dirname, 'public', 'htmls', 'emails', 'changeData.html'), {encoding: 'utf-8'}, function (err, data) {
+                if (err)
+                    res.json({success: false});
+                data = data.replaceAll('#nameData', name);
+                data = data.replaceAll('#link', `${URL}/account/pageChangeData?name=${name}&code=${code}`);
+
+                transporter.sendMail({
+                    from: EMAIL,
+                    to: emailTo,
+                    subject: `Cambio ${name}`,
+                    html: data,
+                    attachments: [
+                        {
+                            file: 'logo.png',
+                            path: path.join(__dirname, 'public', 'images', 'logo.png'),
+                            cid: 'logo.image'
+                        }
+                    ]
+                }).then(() => res.json({success: true}));
+            });
         });
-    });
-});
-
-router.get('/account/remPhoto', function(req, res) {
-    if(req.session.idUser === undefined)
-        res.json({ });
-
-    connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
-        let username = data[0].username;
-        let founded = null;
-
-        fs.readdir(path.join(__dirname, PATH_UPLOADS), function(err, files) {
-           if(err)
-               res.json({ removed: false });
-           files.forEach(f => {
-               if(f.indexOf(username) === 0 && f[username.length] === '.' && founded == null)
-                   founded = f;
-           });
-
-           if(typeof founded === 'string') {
-               fs.unlinkSync(path.join(__dirname, PATH_UPLOADS, founded));
-               res.json({ removed: true });
-           } else
-               res.json({ removed: false });
-        });
-    });
-});
-
-router.post('/account/emailChangeData', function(req, res) {
-    if(req.session.idUser === undefined)
-        res.json({ });
-
-    let { name, value } = req.body;
-    connection.query(`SELECT * FROM newCredential WHERE id=${req.session.idUser};`, function(err, data) {
-        if(data.length === 0)
-            connection.query(`INSERT INTO newCredential(id, ${name}) VALUES(${req.session.idUser}, '${value}')`);
-        else
-            connection.query(`UPDATE newCredential SET ${name}='${value}' WHERE id=${req.session.idUser}`);
-    });
-
-    connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
-        if(err)
-            res.json({ success: false });
-
-        const code = data[0].code;
-        const emailTo = data[0].email;
-        const transporter = mailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: EMAIL,
-                pass: EMAIL_PASS
-            }
-        });
-
-        fs.readFile(path.join(__dirname, 'public', 'htmls', 'emails', 'changeData.html'), { encoding: 'utf-8' }, function(err, data) {
-            if(err)
-                res.json({ success: false });
-            data = data.replaceAll('#nameData', name);
-            data = data.replaceAll('#link', `${URL}/account/pageChangeData?name=${name}&code=${code}`);
-
-            transporter.sendMail({
-                from: EMAIL,
-                to: emailTo,
-                subject: `Cambio ${name}`,
-                html: data,
-                attachments: [
-                    {
-                        file: 'logo.png',
-                        path: path.join(__dirname, 'public', 'images', 'logo.png'),
-                        cid: 'logo.image'
-                    }
-                ]
-            }).then(() => res.json({ success: true }));
-        });
-    });
+    }
 });
 
 router.get('/account/pageChangeData', function(req, res) {
-    let { name, code } = req.query;
-    connection.query(`SELECT * FROM user WHERE code='${code}';`, function(err, data) {
-        if(err || data.length === 0)
-            res.send('Non puoi accedere a questa pagina');
-        else {
-            connection.query(`SELECT * FROM newCredential WHERE id=${data[0].id};`, function(err, data) {
-                if(err || data.length === 0)
-                    res.send('Non puoi accedere a questa pagina');
-                else {
-                    let everyNULL = true;
-                    for (let key in data[0])
-                        if (key !== 'id' && data[0][key] != null) {
-                            everyNULL = false;
-                            break;
-                        }
-
-                    if (everyNULL)
+    if(req.session.idUser === undefined)
+        res.json({ });
+    else {
+        let {name, code} = req.query;
+        connection.query(`SELECT * FROM user WHERE code='${code}';`, function (err, data) {
+            if (err || data.length === 0)
+                res.send('Non puoi accedere a questa pagina');
+            else {
+                connection.query(`SELECT * FROM newCredential WHERE id=${data[0].id};`, function (err, data) {
+                    if (err || data.length === 0)
                         res.send('Non puoi accedere a questa pagina');
-                    else
-                        res.sendFile(path.join(__dirname, 'public', 'htmls', 'change_' + name + '.html'));
-                }
-            });
-        }
-    })
+                    else {
+                        let everyNULL = true;
+                        for (let key in data[0])
+                            if (key !== 'id' && data[0][key] != null) {
+                                everyNULL = false;
+                                break;
+                            }
+
+                        if (everyNULL)
+                            res.send('Non puoi accedere a questa pagina');
+                        else
+                            res.sendFile(path.join(__dirname, 'public', 'htmls', 'change_' + name + '.html'));
+                    }
+                });
+            }
+        });
+    }
 });
 
 router.post('/account/checkNewData', function(req, res) {
@@ -342,30 +346,169 @@ router.post('/account/checkNewData', function(req, res) {
     });
 });
 
-router.post('/account/changeData', function(req, res) {
+router.post('/account/change-data', function(req, res) {
     if(req.session.idUser === undefined)
         res.json({ });
+    else {
+        let {name, value} = req.body;
+        connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function (err, data) {
+            if (name === 'username')
+                fs.readdirSync(path.join(__dirname, PATH_UPLOADS)).map(filename => {
+                    if (filename.indexOf(data[0].username + '.') === 0) {
+                        let ext = filename.split('.')[1];
+                        fs.renameSync(path.join(__dirname, PATH_UPLOADS, filename), path.join(__dirname, PATH_UPLOADS, value + '.' + ext));
+                    }
+                });
 
-    let { name, value } = req.body;
-    connection.query(`UPDATE user SET ${name}='${value}' WHERE id=${req.session.idUser};`);
-    res.json({ });
+            connection.query(`UPDATE user SET ${name}='${value}' WHERE id=${req.session.idUser};`);
+            res.json({ });
+        });
+    }
 });
 
-router.post('/books/getRooms', function(req, res) {
+router.post('/account/username-by-id', function(req, res) {
+    if (req.session.idUser === undefined)
+        res.json({ });
+    else
+        connection.query(`SELECT * FROM user WHERE id=${req.body.id};`, function(err, data) {
+            if(err || data.length === 0)
+                res.json({ user: 'inesistente' });
+            else
+                res.json({ user: data[0].username });
+        });
+});
+
+router.get('/account/get-history', function(req, res) {
+    if (req.session.idUser === undefined)
+        res.json({ });
+    else
+        connection.query(`SELECT * FROM history WHERE user=${req.session.idUser};`, function(err, data) {
+            if(err)
+                res.json({ history: [] });
+            else
+                res.json({ history: data.filter(d => !Boolean(d.canceled)) });
+        });
+});
+
+router.get('/account/clear-history', function(req, res) {
+    if (req.session.idUser === undefined)
+        res.json({ });
+    else {
+        connection.query(`SELECT * FROM history WHERE user=${req.session.idUser} && action=2`, function(err, data) {
+            let n1 = 0, n2 = data.length;
+            data.forEach(d => {
+                connection.query(`DELETE FROM history WHERE id=${d.idHistory}`);
+                n1 ++;
+            });
+            let int = setInterval(function() {
+                if(n1 === n2) {
+                    connection.query(`DELETE FROM history WHERE user=${req.session.idUser} && action=2`);
+                    connection.query(`UPDATE history SET canceled=1 WHERE user=${req.session.idUser} && action=1`);
+                    clearInterval(int);
+                    res.json({ success: true });
+
+                }
+            }, 3);
+        });
+    }
+});
+
+router.post('/account/email-rem-account', function(req, res) {
+    if (req.session.idUser === undefined)
+        res.json({ });
+    else {
+        connection.query(`SELECT * FROM user WHERE id=${req.session.idUser}`, function(err, data) {
+            if(err || data.length !== 1)
+                res.json({ });
+            else {
+                let { code, email } = data[0];
+
+                const transporter = mailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: EMAIL,
+                        pass: EMAIL_PASS
+                    }
+                });
+
+                fs.readFile(path.join(__dirname, 'public', 'htmls', 'emails', 'remAccount.html'), { encoding: 'utf-8' }, function(err, data) {
+                    data = data.replaceAll('#link', URL + '/account/rem-account-page?code=' + code);
+
+                    transporter.sendMail({
+                        from: EMAIL,
+                        to: email,
+                        subject: 'Elimina il tuo account',
+                        html: data,
+                        attachments: [
+                            {
+                                file: 'logo.png',
+                                path: path.join(__dirname, 'public', 'images', 'logo.png'),
+                                cid: 'logo.image'
+                            }
+                        ]
+                    });
+
+                    res.json({ success: true });
+                });
+            }
+        })
+    }
+});
+
+router.get('/account/rem-account-page', function(req, res) {
+    connection.query(`SELECT * FROM user WHERE code='${req.query.code}';`, function(err, data) {
+        if(err || data.length !== 1)
+            res.send('non puoi accedere a questo url');
+        else
+            res.sendFile(path.join(__dirname, 'public', 'htmls', 'confRemAccount.html'));
+
+    });
+});
+
+router.post('/account/rem-account', function(req, res) {
+    let { password, code } = req.body;
+    connection.query(`SELECT * FROM user WHERE password='${password}' && code='${code}';`, function(err, data) {
+        if(err || data.length !== 1)
+            res.json({ success: false });
+        else {
+            let id = data[0].id;
+            connection.query(`DELETE FROM newCredential WHERE id=${id};`);
+            connection.query('SELECT * FROM history WHERE user=${id};', function(err, data) {
+                if(!err)
+                    for(let d of data)
+                        if(d.id_email !== null)
+                            clearInterval(d.id_email);
+            });
+            connection.query(`DELETE FROM history WHERE user=${id};`);
+            connection.query(`DELETE FROM user WHERE id=${id};`);
+
+            fs.readdirSync(path.join(__dirname, PATH_UPLOADS)).map(filename => {
+                if(filename.indexOf(data[0].username + '.') === 0)
+                    fs.unlinkSync(path.join(__dirname, PATH_UPLOADS, filename));
+            });
+
+            req.session.destroy();
+            res.json({ success: true });
+        }
+    });
+});
+
+router.post('/books/get-rooms', function(req, res) {
     if(req.session.idUser === undefined)
         res.json({ });
-
-    connection.query('SELECT * FROM room;', function(err, data) {
-        data.forEach(d => {
-            d.css = JSON.parse(d.css);
-            d.css.left = d.css.sx;
-            delete d.css.sx;
+    else {
+        connection.query('SELECT * FROM room;', function (err, data) {
+            data.forEach(d => {
+                d.css = JSON.parse(d.css);
+                d.css.left = d.css.sx;
+                delete d.css.sx;
+            });
+            if (err)
+                res.json({ rooms: [ ] });
+            else
+                res.json({ rooms: data });
         });
-        if(err)
-            res.json({ rooms: [] });
-        else
-            res.json({ rooms: data });
-    })
+    }
 });
 
 router.get('/books/getPlan', function(req, res) {
@@ -375,30 +518,7 @@ router.get('/books/getPlan', function(req, res) {
         res.sendFile(path.join(__dirname, 'public', 'images', 'zones', req.query.name + '.png'));
 });
 
-router.get('/books/getBook', function(req, res) {
-    if(req.session.idUser === undefined)
-        res.json({ });
-    else {
-        const { day, time } = req.query;
-        connection.query(`SELECT * FROM history WHERE day='${day}' && time='${time}' && action=1;`, function(err, data) {
-            if(err)
-                res.json({ data: [] });
-            else {
-                data.filter(d => {
-                    connection.query(`SELECT * FROM history WHERE idHistory=${d.id};`, function(err, data) {
-                        if(!err && data.length === 0)
-                            return d;
-                        else
-                            return null;
-                    });
-                });
-                res.json({ data: data });
-            }
-        });
-    }
-}); // maybe unused
-
-router.get('/books/saveBook', function(req, res) {
+router.get('/books/save-book', function(req, res) {
     if(req.session.idUser === undefined)
         res.json({ });
     else {
@@ -425,7 +545,7 @@ router.get('/books/saveBook', function(req, res) {
     }
 });
 
-router.get('/books/getBooks', function(req, res) {
+router.get('/books/get-books', function(req, res) {
     if (req.session.idUser === undefined)
         res.json({ });
     else {
@@ -452,30 +572,6 @@ router.get('/books/getBooks', function(req, res) {
            }
         });
     }
-});
-
-router.post('/account/username-by-id', function(req, res) {
-    if (req.session.idUser === undefined)
-        res.json({ });
-    else
-        connection.query(`SELECT * FROM user WHERE id=${req.body.id};`, function(err, data) {
-            if(err || data.length === 0)
-                res.json({ user: 'inesistente' });
-            else
-                res.json({ user: data[0].username });
-        });
-});
-
-router.get('/account/get-history', function(req, res) {
-    if (req.session.idUser === undefined)
-        res.json({ });
-    else
-        connection.query(`SELECT * FROM history WHERE user=${req.session.idUser};`, function(err, data) {
-           if(err)
-               res.json({ history: [] });
-           else
-               res.json({ history: data.filter(d => !Boolean(d.canceled)) });
-        });
 });
 
 router.get('/my-books/segna-gia-letto', function(req, res) {
@@ -551,6 +647,12 @@ router.get('/my-books/delete-book', function(req, res) {
         let int = setInterval(function() {
             if(id !== undefined) {
                 connection.query(`INSERT INTO history(action, room, zone, day, time, date, user, visualized, idHistory, canceled) VALUES(2, '${room}', '${zone}', '${day}', '${time}', '${s}', ${req.session.idUser}, 0, ${id}, 0);`);
+
+                connection.query(`SELECT * FROM history WHERE id=${id}`, function(err, data) {
+                    if(data[0].id_email !== null)
+                        clearInterval(data[0].id_email);
+                });
+
                 res.json({ success: true });
                 clearInterval(int);
             }
@@ -558,27 +660,113 @@ router.get('/my-books/delete-book', function(req, res) {
     }
 });
 
-router.get('/account/clear-history', function(req, res) {
+router.get('/my-books/delete-email', function(req, res) {
     if (req.session.idUser === undefined)
         res.json({ });
     else {
-        connection.query(`SELECT * FROM history WHERE user=${req.session.idUser} && action=2`, function(err, data) {
-            let n1 = 0, n2 = data.length;
-            data.forEach(d => {
-                connection.query(`DELETE FROM history WHERE id=${d.idHistory}`);
-                n1 ++;
-            });
-            let int = setInterval(function() {
-                if(n1 === n2) {
-                    connection.query(`DELETE FROM history WHERE user=${req.session.idUser} && action=2`);
-                    connection.query(`UPDATE history SET canceled=1 WHERE user=${req.session.idUser} && action=1`);
-                    clearInterval(int);
-                    res.json({ success: true });
+        clearIntervalEmail(req.query.id);
+        res.json({ success: true });
+    }
+});
 
-                }
-            }, 3);
+router.get('/my-books/set-email', function(req, res) {
+    if (req.session.idUser === undefined)
+        res.json({ });
+    else {
+        let { id, time } = req.query;
+        connection.query(`UPDATE history SET time_email='${time}' WHERE id=${id}`, function() {
+           connection.query(`SELECT * FROM history WHERE id=${id}`, function(err, data) {
+               if(data[0].id_email != null)
+                   clearInterval(data[0].id_ema2il);
+
+               let int = getIntervalForEmail(data[0]);
+               connection.query(`UPDATE history SET id_email=${int} WHERE id=${id}`);
+               res.json({
+                   success: true,
+                   d_email: int
+               });
+           });
         });
     }
 });
 
 app.listen(PORT);
+
+connection.query(`SELECT * FROM history WHERE id_email IS NOT NULL`, function(err, data) {
+    for(let da of data)
+        connection.query(`UPDATE history SET id_email=${getIntervalForEmail(da)} WHERE id=${da.id}`);
+});
+
+function getIntervalForEmail(da) {
+    let date = new Date();
+    let [ d, h, m ] = da.time_email.split(' ');
+
+    let [ dayD, dayM, dayY ] = da.day.split('/');
+    let [ hD, mD ] = da.time.split(' - ')[0].split(':');
+
+    date.setMonth(parseInt(dayM) - 1);
+    date.setFullYear(parseInt(dayY));
+    date.setDate(parseInt(dayD) - parseInt(d));
+    date.setUTCHours(parseInt(hD) - parseInt(h) - 1);
+    date.setUTCMinutes(parseInt(mD) - parseInt(m));
+    date.setUTCSeconds(0);
+
+    let interval = setInterval(function() {
+        let d = new Date();
+        d.setUTCHours(d.getHours());
+        if(date < d) {
+            connection.query(`SELECT * FROM history WHERE id=${da.id}`, function (err, data) {
+                let pren = data[0];
+                const transporter = mailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: EMAIL,
+                        pass: EMAIL_PASS
+                    }
+                });
+                fs.readFile(path.join(__dirname, 'public', 'htmls', 'emails', 'rememberEvent.html'), {encoding: 'utf-8'}, function (err, data) {
+                    data = data.replaceAll('#nomeRoom', pren.room);
+                    data = data.replaceAll('#nomeZone', pren.zone);
+                    data = data.replaceAll('#giorno', pren.day);
+                    data = data.replaceAll('#orario', pren.time);
+
+                    let traQuanto = '';
+                    let [d, h, m] = pren.time_email.split(' ');
+                    traQuanto = parseInt(d) === 0 ? '' : parseInt(d) === 1 ? '1 giorno' : d + ' giorni';
+                    traQuanto += parseInt(h) === 0 ? '' : parseInt(h) === 1 ? ' 1 ora' : ' ' + h + ' ore';
+                    traQuanto += parseInt(m) === 0 ? '' : parseInt(m) === 1 ? ' 1 minuto' : ' ' + m + ' minuti';
+                    let textToSend = data.replaceAll('#traQuanto', traQuanto);
+
+                    connection.query(`SELECT * FROM user WHERE id=${da.user}`, function(err, data) {
+                        transporter.sendMail({
+                            from: EMAIL,
+                            to: data[0].email,
+                            subject: 'Ricorda',
+                            html: textToSend,
+                            attachments: [
+                                {
+                                    file: 'logo.png',
+                                    path: path.join(__dirname, 'public', 'images', 'logo.png'),
+                                    cid: 'logo.image'
+                                }
+                            ]
+                        });
+
+                        clearInterval(pren.id_email);
+                        clearInterval(interval);
+                        connection.query(`UPDATE history SET id_EMAIL=NULL WHERE id=${da.id}`);
+                    });
+                });
+            });
+        }
+    }, 600);
+
+    return Number(interval);
+}
+
+function clearIntervalEmail(id) {
+    connection.query(`SELECT * FROM history WHERE id=${id}`, function(err, data) {
+        clearInterval(data[0].id_email);
+        connection.query(`UPDATE history SET id_EMAIL=NULL WHERE id=${id}`);
+    });
+}

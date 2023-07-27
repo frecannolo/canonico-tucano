@@ -4,8 +4,8 @@
   align-items: center;
   justify-content: center;
   gap: 40px;
-  padding: 20px 20px;
-  width: 260px;
+  padding: 20px;
+  width: calc(100% - 40px);
 }
 
 #header {
@@ -20,7 +20,8 @@
   font-size: 17px;
   color: #673ab7;
   letter-spacing: 0.08em;
-  margin: auto 50px auto 0;
+  margin: auto 0 auto 0;
+  padding-right: 50px;
 }
 
 mat-icon {
@@ -32,22 +33,30 @@ mat-icon:hover {
   cursor: pointer;
 }
 
+#content {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-around;
+  align-items: center;
+}
+
+mat-form-field {
+  width: 100px;
+  max-width: 27%;
+}
+
 #footer {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  gap: 50px;
+  justify-content: center;
   align-items: center;
 }
 
 #btn-confirm {
   background-color: #2ca62c;
-  margin-bottom: 15px;
   color: white;
-}
-
-#error {
-  margin-top: 10px;
-  color: #f44336;
-  letter-spacing: 0.07em;
 }
 
 mat-progress-bar {

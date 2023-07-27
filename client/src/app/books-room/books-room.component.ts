@@ -10,8 +10,8 @@ import {HistoryService} from "../history.service";
   styleUrls: ['./books-room.component.css']
 })
 export class BooksRoomComponent implements OnInit {
-  readonly START: string = '09:00';
-  readonly FINISH: string = '18:00';
+  readonly START: string = '12:00';
+  readonly FINISH: string = '21:00';
   readonly GAP: string = '1:00';
   readonly WIDTH_TO_CHANGE: number = 1000;
   readonly START_DAY_OF_THE_WEEK: number = 1;

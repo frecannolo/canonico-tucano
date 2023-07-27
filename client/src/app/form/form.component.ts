@@ -1,11 +1,11 @@
-import {Component} from '@angular/core';
-import {UserService} from "../user.service";
-import {Router} from "@angular/router";
-import {FormControl, Validators} from "@angular/forms";
+import { Component } from '@angular/core';
+import { UserService } from '../user.service';
+import { Router } from '@angular/router';
+import { FormControl, Validators } from '@angular/forms';
 
+// --- costanti di tipo RegExp che indicano le espressioni regolari della password e dell'username
 const REGEX_PASSW: RegExp = /^(=?.*[A-Z])(?=.*[0-9])[a-zA-Z0-9!?]{8,}$/;
 const REGEX_USERN: RegExp = /^[a-zA-Z0-9_]{3,}$/;
-const STR_NO_ERROR: string = 'no errors';
 
 @Component({
   selector: 'app-form',
@@ -13,28 +13,33 @@ const STR_NO_ERROR: string = 'no errors';
   styleUrls: ['./form.component.css']
 })
 export class FormComponent {
-  isLogin: boolean = true;          // booleana che afferma se è in login o in registrazione
-  passwordHided: boolean = true;    // booleana che afferma se la password è visibile
-  onLoad: boolean = false;          // booleana che afferma se sta effettuando qualche azione
+  readonly STR_NO_ERROR: string = 'no errors';  // costante stringa che indica che non ci sono errori
 
-  error: string = STR_NO_ERROR;     // stringa che indica l'errore da segnalare
-  noErrorAtSignUp: boolean = false; // booleana che afferma se c'è un errore da segnalare all'utente
+  isLogin: boolean = true;                      // booleana che afferma se è in login o in registrazione
+  passwordHided: boolean = true;                // booleana che afferma se la password è visibile
+  onLoad: boolean = false;                      // booleana che afferma se sta effettuando qualche azione
+
+  error: string = this.STR_NO_ERROR;            // stringa che indica l'errore da segnalare
+  noErrorAtSignUp: boolean = false;             // booleana che afferma se c'è un errore da segnalare all'utente
 
   // --- controlli sui campi di username, password ed email (tutti e tre sono required)
   email: FormControl = new FormControl('', [Validators.required, Validators.email]);
-  password: FormControl = new FormControl('Francesc0', [Validators.required, Validators.pattern(REGEX_PASSW)]);
-  username: FormControl = new FormControl('cano', [Validators.required, Validators.pattern(REGEX_USERN)]);
+  password: FormControl = new FormControl('', [Validators.required, Validators.pattern(REGEX_PASSW)]);
+  username: FormControl = new FormControl('', [Validators.required, Validators.pattern(REGEX_USERN)]);
 
-  constructor(public user: UserService, public router: Router) {
-    // --- specifico di voler utilizzare il servizio UserService e la classe Router in maniera globale
-  }
+  /* specifico di utilizzare un'istanza pubblica di:
+    - servizio UserService per effettuare richieste http
+    - classe Router per cambiare Route in caso di accesso
+   */
+  constructor(public user: UserService, public router: Router) { }
 
   // --- metodo richiamato per accedere o registrarsi
   send(): void {
-    this.error = STR_NO_ERROR;
+    this.error = this.STR_NO_ERROR;
     this.noErrorAtSignUp = false;
     this.onLoad = true;
 
+    // setTmeout inseritio per simulare una pausa
     setTimeout((): void => {
       if (this.isLogin)
         this.login();
@@ -52,7 +57,7 @@ export class FormComponent {
         if(!res.logged)
           this.error = 'Le credenziali inserite non sono corrette';
         else
-          this.router.navigate(['/home']);
+          this.router.navigate(['/home/prenota']);
       })
   }
 
@@ -71,10 +76,8 @@ export class FormComponent {
 
   // --- metodo per cambiare da login a sign up e viceversa
   toggleLoginSignUp(): void {
-    this.error = STR_NO_ERROR;
+    this.error = this.STR_NO_ERROR;
     this.noErrorAtSignUp = false;
     this.isLogin = !this.isLogin;
   }
-
-  protected readonly STR_NO_ERROR = STR_NO_ERROR;
 }

@@ -11,13 +11,12 @@ import {PagesService} from "../pages.service";
 })
 export class NavbarComponent implements OnInit {
   width: number = 1600;
-  username: string = '';
 
   constructor(public user: UserService, private dialog: MatDialog, public pages: PagesService) { }
 
   ngOnInit(): void {
     this.width = window.innerWidth;
-    this.user.getUsername().subscribe(res => this.username = res.username != undefined? res.username : '');
+    this.user.getUsername().subscribe(res => this.user.username = res.username);
   }
 
   openMenu(): void {

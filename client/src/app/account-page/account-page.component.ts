@@ -4,6 +4,7 @@ import {ConfirmComponent} from "../confirm/confirm.component";
 import {ChangeDataService} from "../changeData.service";
 import {HistoryService} from "../history.service";
 import {CalendarService} from "../calendar.service";
+import {PagesService} from "../pages.service";
 
 const DATA_TO_CONFIRM = ['email', 'password'];
 const REGEX_PASSW: RegExp = /^(=?.*[A-Z])(?=.*[0-9])[a-zA-Z0-9!?]{8,}$/;
@@ -28,7 +29,7 @@ export class AccountPageComponent implements OnInit {
     username: REGEX_USERN
   }
 
-  constructor(public user: UserService, public cds: ChangeDataService, public hs: HistoryService, public calendar: CalendarService) { }
+  constructor(public user: UserService, public cds: ChangeDataService, public hs: HistoryService, public calendar: CalendarService, public pages: PagesService) { }
 
   ngOnInit(): void {
     this.user.getData().subscribe(res => {
@@ -123,17 +124,23 @@ export class AccountPageComponent implements OnInit {
   }
 
   open(): void {
-    this.cds.elementsToChange = [];
-    this.data.forEach(d => {
-      if(d.value != this.startData[d.name])
-        this.cds.elementsToChange.push(d);
-    });
+    let changed: any[] = [];
+    for(let d of this.data)
+      if(d.value != this.startData[d.name] && d.regex.test(d.value))
+        changed.push(d);
 
     this.cds.dialog = this.cds.Dialog.open(ConfirmComponent, {
       data: {
-        next: this.cds.setMessages
+        next: () => {
+          this.cds.setMessages(changed);
+          changed.forEach(c => this.startData[c.name] = c.value);
+        }
       }
     });
+  }
+
+  reset(): void {
+    this.data.forEach(d => d.value = this.startData[d.name]);
   }
 
   clearHistory(): void {
@@ -149,6 +156,29 @@ export class AccountPageComponent implements OnInit {
         }
       }
     });
+  }
+
+  getPasswd(p: string): string {
+    let t = p.substring(2, p.length - 2);
+    let s = '';
+    for(let n = 0; n < t.length; n ++)
+      s += '*';
+
+    return p.split(t).join(s);
+  }
+
+  remAccount(): void {
+    this.cds.dialog = this.cds.Dialog.open(ConfirmComponent, {
+      data: {
+        next: () => this.user.remAccount().subscribe(() => {
+          this.pages.load = true;
+          setTimeout(() => {
+            this.pages.load = false;
+            this.user.logout();
+          }, 1500);
+        })
+      }
+    })
   }
 
   @HostListener('window:resize', ['$event'])

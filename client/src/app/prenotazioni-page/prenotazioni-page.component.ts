@@ -4,6 +4,7 @@ import {UserService} from "../user.service";
 import {CalendarService} from "../calendar.service";
 import {ConfirmComponent} from "../confirm/confirm.component";
 import {ChangeDataService} from "../changeData.service";
+import {SetOraNotificaComponent} from "../set-ora-notifica/set-ora-notifica.component";
 
 @Component({
   selector: 'app-prenotazioni-page',
@@ -131,5 +132,15 @@ export class PrenotazioniPageComponent implements OnInit {
       }
     });
 
+  }
+
+  open(ev: any): void {
+    this.cds.dialog = this.cds.Dialog.open(SetOraNotificaComponent, {
+      width: '500px',
+      maxWidth: '95%',
+      data: {
+        pren: ev
+      }
+    });
   }
 }

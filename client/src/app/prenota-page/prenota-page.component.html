@@ -24,7 +24,7 @@
     <div id="plans">
       <mat-tab-group>
         <mat-tab *ngFor="let zone of zones | visRoom:filter" [label]="zone.name">
-          <img class='img-plan' [src]="user.URL_S + '/books/getPlan?name=' + zone.name.split(' ').join('_')">
+          <img class='img-plan' [src]="'/books/getPlan?name=' + zone.name.split(' ').join('_')">
           <button mat-button class="room" [ngStyle]="btn.css" *ngFor="let btn of zone.rooms" (click)="open(btn.name, zone.name)">{{btn.name}}</button>
         </mat-tab>
       </mat-tab-group>

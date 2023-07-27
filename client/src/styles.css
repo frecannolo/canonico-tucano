@@ -25,10 +25,6 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .mat-badge-content.mat-badge-active {
   color: transparent;
-  /*height: 30px;
-  width: 30px;
-  top: -15px;
-  left: -15px;*/
 }
 
 #notifications .mdc-button__label {

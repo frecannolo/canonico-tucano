@@ -40,7 +40,7 @@
           <button mat-menu-item id="button-cancella" (click)="delete(ev)"><mat-icon>delete</mat-icon>Cancella</button>
           <button mat-menu-item *ngIf="!ev.visualized" id="button-segna-letto" (click)="segnaGiaLetto(ev)"><mat-icon>grade</mat-icon>Segna come letto</button>
           <button mat-menu-item id="fissa-button" (click)="fissa(ev)"><mat-icon>push_pin</mat-icon>{{ev.secured? 'non fissare': 'fissa'}} il alto</button>
-          <button mat-menu-item id="btn-mail"><mat-icon>mail</mat-icon>{{ev.time_email == null? 'manda': 'annulla'}} email di notifica</button>
+          <button mat-menu-item id="btn-mail" (click)="open(ev)"><mat-icon>mail</mat-icon>email di notifica</button>
         </mat-menu>
       </div>
 
