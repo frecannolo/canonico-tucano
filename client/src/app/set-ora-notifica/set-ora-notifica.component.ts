@@ -25,7 +25,6 @@ export class SetOraNotificaComponent {
   pren: any;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: any, public cds: ChangeDataService, public user: UserService) {
-    console.log(data)
     this.pren = data.pren;
     this.pren.time_email = data.pren.time_email == null? '0 0 0': data.pren.time_email;
   }
@@ -36,6 +35,7 @@ export class SetOraNotificaComponent {
       setTimeout(() => {
         if (res.success) {
           this.data.pren.id_email = null;
+          this.data.pren.time_email = null;
           this.cds.dialog.close();
         }
         this.load = false;
@@ -49,7 +49,7 @@ export class SetOraNotificaComponent {
       setTimeout(() => {
         if (res.success) {
           this.data.pren.id_email = res.id_email;
-          this.data.pren.time_mail = `${d.value} ${h.value} ${m.value}`;
+          this.data.pren.time_email = `${d.value} ${h.value} ${m.value}`;
           this.pren.time_email = `${d.value} ${h.value} ${m.value}`
           this.cds.dialog.close();
         }

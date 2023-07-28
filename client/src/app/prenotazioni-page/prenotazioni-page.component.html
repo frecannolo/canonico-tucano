@@ -54,7 +54,7 @@
           <p>prenotazione del:</p><p>{{calendar.getDate(ev.date)}}</p>
         </div>
         <div class="suppl-info">
-          <p>email:</p><p>{{ev.time_email != null? ev.time_email + ' prima': 'non assegnata'}}</p>
+          <p>email:</p><p>{{ev.time_email != null? getTimeEmail(ev.time_email) + ' prima': 'non assegnata'}}</p>
         </div>
       </div>
     </div>

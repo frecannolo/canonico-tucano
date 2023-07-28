@@ -112,24 +112,18 @@ export class UserService {
   }
 
   // --- effettua e ritorna la request get http per segnare come letto una notifica di prenotazione o annullamento
-  segnaGiaLetto(id: number | undefined, room: string, zone: string, day: string, time: string): Observable<any> {
-    if(typeof id == 'number')
-      return this.http.get(`/my-books/segna-gia-letto?id=${id}`);
-    return this.http.get(`/my-books/segna-gia-letto?room=${room}&zone=${zone}&day=${day}&time=${time}`);
+  segnaGiaLetto(id: number): Observable<any> {
+    return this.http.get(`/my-books/segna-gia-letto?id=${id}`);
   }
 
-  // --- effettua e ritorna la request get http per fissare o non fissare una prenotazione (in base al valore di secured) data da id, stanza, zona, giorno e orario
-  changeSecured(id: number | undefined, secured: boolean, room: string, zone: string, day: string, time: string): Observable<any> {
-    if(typeof id == 'number')
-      return this.http.get(`/my-books/change-secured?id=${id}&value=${Number(!secured)}`);
-    return this.http.get(`/my-books/change-secured?value=${Number(!secured)}&room=${room}&zone=${zone}&day=${day}&time=${time}`);
+  // --- effettua e ritorna la request get http per fissare o non fissare una prenotazione (in base al valore di secured) data da id
+  changeSecured(id: number, secured: boolean): Observable<any> {
+    return this.http.get(`/my-books/change-secured?id=${id}&value=${Number(!secured)}`);
   }
 
   // --- effettua e ritorna la request get http per cancellare una prenotazione dato id, stanza, zona, giorno e orario
   removeEvent(id: number | undefined, room: string, zone: string, day: string, time: string): Observable<any> {
-    if(typeof id == 'number')
       return this.http.get(`/my-books/delete-book?id=${id}&room=${room}&zone=${zone}&day=${day}&time=${time}`);
-    return this.http.get(`/my-books/delete-book?room=${room}&zone=${zone}&day=${day}&time=${time}`);
   }
 
   // --- effettua e ritorna la request get http che ripulice la cronologia dell'utente

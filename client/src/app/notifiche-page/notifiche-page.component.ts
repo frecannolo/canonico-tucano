@@ -21,7 +21,7 @@ export class NotifichePageComponent implements OnInit {
 
       this.notifications = this.notifications.filter(n => {
         if(!Boolean(n.visualized)) {
-          this.user.segnaGiaLetto(n.id, n.room, n.zone, n.day, n.time).subscribe(() => { }); // senza il subscribe non va
+          this.user.segnaGiaLetto(n.id).subscribe(() => { }); // senza il subscribe non va
           return n;
         }
       });

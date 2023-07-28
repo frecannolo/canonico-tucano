@@ -29,11 +29,11 @@ export class ChangeDataService {
           });
         });
       } else {
-        this.user.changeData(el.name, el.value).subscribe(() => {
+        this.user.changeData(el.name, el.value).subscribe(res => {
           this.messages.push({
-            text: `il campo ${el.name} è stato aggiornato`,
-            icon: 'done',
-            color: '#2ca62c',
+            text: res.success? `il campo ${el.name} è stato aggiornato`: `non è stato possibile aggiornare il campo ${el.name}`,
+            icon: res.success? 'done': 'error',
+            color: res.success? '#2ca62c': '#f44336',
             visible: true
           });
         });

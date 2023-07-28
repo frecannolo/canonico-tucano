@@ -80,7 +80,7 @@ export class PrenotazioniPageComponent implements OnInit {
 
   segnaGiaLetto(el: any): void {
     if(el.visualized == 0)
-      this.user.segnaGiaLetto(el.id, el.room, el.zone, el.day, el.time).subscribe(res => {
+      this.user.segnaGiaLetto(el.id).subscribe(res => {
         if(res.success) {
           el.visualized = true;
           this.hs.notifications --;
@@ -94,7 +94,7 @@ export class PrenotazioniPageComponent implements OnInit {
   }
 
   fissa(el: any): void {
-    this.user.changeSecured(el.id, el.secured, el.room, el.zone, el.day, el.time).subscribe(() => {
+    this.user.changeSecured(el.id, el.secured).subscribe(() => {
       el.secured = !el.secured;
       this.sort();
     });
@@ -142,5 +142,10 @@ export class PrenotazioniPageComponent implements OnInit {
         pren: ev
       }
     });
+  }
+
+  getTimeEmail(s: string): string {
+    let [d, h, m] = s.split(' ');
+    return `${parseInt(d) == 0? '': parseInt(d) == 1? '1 giorno ': d + ' giorni '}${parseInt(h) == 0? '': parseInt(h) == 1? '1 ora ': h + ' ore '}${parseInt(m) == 0? '': parseInt(m) == 1? '1 minuto': m + ' minuti'}`;
   }
 }
