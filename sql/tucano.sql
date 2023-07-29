@@ -16,14 +16,6 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Current Database: `TUCANO_1`
---
-
-CREATE DATABASE /*!32312 IF NOT EXISTS*/ `TUCANO_1` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */;
-
-USE `TUCANO_1`;
-
---
 -- Table structure for table `history`
 --
 
@@ -47,7 +39,7 @@ CREATE TABLE `history` (
   `idHistory` int(11) DEFAULT NULL,
   `canceled` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -56,6 +48,16 @@ CREATE TABLE `history` (
 
 LOCK TABLES `history` WRITE;
 /*!40000 ALTER TABLE `history` DISABLE KEYS */;
+INSERT INTO `history` VALUES
+(21,1,'room 05','piano terra','29/07/2023','15:00 - 16:00','28/7/2023 alle 13:21','reason 1',6,1,0,NULL,'0 3 0',NULL,0),
+(22,1,'room 05','piano terra','30/07/2023','14:00 - 15:00','28/7/2023 alle 13:21','reason 2',6,1,0,NULL,NULL,NULL,0),
+(23,1,'room 05','piano terra','30/07/2023','17:00 - 18:00','28/7/2023 alle 13:21','reason 3',6,1,0,NULL,NULL,NULL,0),
+(24,1,'room 12','primo piano','30/07/2023','15:00 - 16:00','28/7/2023 alle 14:55','ciao',6,1,1,NULL,NULL,NULL,0),
+(25,2,'room 05','piano terra','30/07/2023','14:00 - 15:00','28/7/2023 alle 15:11',NULL,6,1,NULL,NULL,NULL,22,0),
+(26,1,'room 08','primo piano','29/07/2023','16:00 - 17:00','28/7/2023 alle 15:12','gg',6,1,0,NULL,NULL,NULL,0),
+(28,1,'room 32','quarto piano','30/07/2023','16:00 - 17:00','28/7/2023 alle 16:58','fre',6,1,0,NULL,NULL,NULL,0),
+(33,1,'room 02','piano terra','30/07/2023','13:00 - 15:00','28/7/2023 alle 22:37','infatti',11,1,0,21,'0 0 10',NULL,0),
+(34,1,'room 02','piano terra','29/07/2023','13:00 - 15:00','28/7/2023 alle 22:37','ecco',11,1,1,NULL,NULL,NULL,0);
 /*!40000 ALTER TABLE `history` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -152,8 +154,9 @@ CREATE TABLE `user` (
   `email` varchar(255) DEFAULT NULL,
   `verified` int(11) DEFAULT NULL,
   `code` varchar(255) DEFAULT NULL,
+  `removed` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -162,6 +165,9 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
+INSERT INTO `user` VALUES
+(6,'cano','NTM5Zjk0NWYzYTM2YTMwNWQzZTU5ZDIzNGJmNjYxZTQ=','fre.canonico@gmail.com',1,'6RWLA3JksHqunk6bKJSWJ24jIex2vZHBxO5g8Jy4UzF1RXTORR',0),
+(12,'canox','NTM5Zjk0NWYzYTM2YTMwNWQzZTU5ZDIzNGJmNjYxZTQ=','francesco.canonico@itiscuneo.eu',1,'M0LYGIFkhcwdxpkotYKYvVAVvHBi0DKBIFtvJvsoGpPJM19WmM',1);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -174,4 +180,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-07-04 11:53:59
+-- Dump completed on 2023-07-29 16:56:39

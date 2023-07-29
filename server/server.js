@@ -53,7 +53,7 @@ router.post('/login', function(req, res) {
     let { username, password } = req.body;
 
     // eseguo una query nel database l'utente
-    connection.query(`SELECT * FROM user WHERE username='${username}' && password='${password}' && verified=1;`, function(err, data) {
+    connection.query(`SELECT * FROM user WHERE username='${username}' && password=TO_BASE64(MD5('${password}')) && verified=1 && removed=0;`, function(err, data) {
         if(data.length === 1) { // se la query ritorna uno e un solo elemento salvo un parametro idUser con l'id dell'utente al database
            req.session.idUser = data[0].id;
            res.json({ logged: true });
@@ -68,52 +68,54 @@ router.post('/sign-up', function(req, res) {
     let { username, email, password } = req.body;
 
     // controllo che l'username non sia già stato preso
-    connection.query(`SELECT * FROM user WHERE username='${username}';`, function(err, data) {
+    connection.query(`SELECT * FROM user WHERE username='${username}' && removed=0;`, function(err, data) {
         if(data.length > 0)
             res.json({ error: `L'username ${username} esiste già` });
-    });
-    // controllo che la mail non sia già associata ad un altro account
-    connection.query(`SELECT * FROM user WHERE email='${email}';`, function(err, data) {
-        if(data.length > 0)
-            res.json({ error: 'Hai già un account con questa mail' });
-    });
+        else {
+            // controllo che la mail non sia già associata ad un altro account
+            connection.query(`SELECT * FROM user WHERE email='${email}' && removed=0;`, function(err, data) {
+                if(data.length > 0)
+                    res.json({ error: 'Hai già un account con questa mail' });
+                else {
+                    // creo un codice è inserisco un nuovo account nel database, con verified = 0 perché bisogna fare la conferma via mail
+                    let code = '';
+                    for(let i = 0; i < LEN_CODE; i ++)
+                        code += CARACTS_CODE[Math.floor(Math.random() * CARACTS_CODE.length)];
+                    connection.query(`INSERT INTO user(username, password, email, verified, code, removed) VALUES('${username}', TO_BASE64(MD5('${password}')), '${email}', 0, '${code}', 0)`);
 
-    // creo un codice è inserisco un nuovo account nel database, con verified = 0 perché bisogna fare la conferma via mail
-    let code = '';
-    for(let i = 0; i < LEN_CODE; i ++)
-        code += CARACTS_CODE[Math.floor(Math.random() * CARACTS_CODE.length)];
-    connection.query(`INSERT INTO user(username, password, email, verified, code) VALUES('${username}', '${password}', '${email}', 0, '${code}')`);
+                    // preparo il trasporto dell'email
+                    const transporter = mailer.createTransport({
+                        service: 'gmail',
+                        auth: {
+                            user: EMAIL,
+                            pass: EMAIL_PASS
+                        }
+                    });
 
-    // preparo il trasporto dell'email
-    const transporter = mailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: EMAIL,
-            pass: EMAIL_PASS
-        }
-    });
+                    fs.readFile(path.join(__dirname, 'public', 'htmls', 'emails', 'confirmSignUp.html'), { encoding: 'utf-8' }, function(err, data) {
+                        // apro il file html della mail da inviare e sostituisco tutte le scritte '#link' con il link della pagina
+                        data = data.replaceAll('#link', URL + '/checkCode?code=' + code);
 
-    fs.readFile(path.join(__dirname, 'public', 'htmls', 'emails', 'confirmSignUp.html'), { encoding: 'utf-8' }, function(err, data) {
-        // apro il file html della mail da inviare e sostituisco tutte le scritte '#link' con il link della pagina
-        data = data.replaceAll('#link', URL + '/checkCode?code=' + code);
+                        // invio la mail inserendo tra gli attachments il logo di Tucano
+                        transporter.sendMail({
+                            from: EMAIL,
+                            to: email,
+                            subject: 'Conferma la tua registrazione',
+                            html: data,
+                            attachments: [
+                                {
+                                    file: 'logo.png',
+                                    path: path.join(__dirname, 'public', 'images', 'logo.png'),
+                                    cid: 'logo.image'
+                                }
+                            ]
+                        });
 
-        // invio la mail inserendo tra gli attachments il logo di Tucano
-        transporter.sendMail({
-            from: EMAIL,
-            to: email,
-            subject: 'Conferma la tua registrazione',
-            html: data,
-            attachments: [
-                {
-                    file: 'logo.png',
-                    path: path.join(__dirname, 'public', 'images', 'logo.png'),
-                    cid: 'logo.image'
+                        res.json({ error: 'no errors' });
+                    });
                 }
-           ]
-       });
-
-        // ritorno un json vuoto
-        res.json({ });
+            });
+        }
     });
 });
 
@@ -122,7 +124,7 @@ router.get('/checkCode', function(req, res) {
     let code = req.query.code;
     let filename;
 
-    connection.query(`SELECT * FROM user WHERE code='${code}' && verified=0;`, function (err, data) {
+    connection.query(`SELECT * FROM user WHERE code='${code}' && verified=0 && removed=0;`, function (err, data) {
         /*
             controllo che ci sia un'account non verificato con il codice passato come parametro, in base al numero di
             risultati scelgo il file da far visualizzare all'utente e segno l'account come verificato
@@ -151,6 +153,16 @@ router.get('/logout', function(req, res) {
     res.json({ });
 });
 
+// --- route per fare il controllo delle password
+router.post('/check-password', function(req, res) {
+    if(req.session.idUser === undefined)
+        res.json({ });
+    else
+        connection.query(`SELECT * FROM user WHERE id=${req.session.idUser} && password=TO_BASE64(MD5('${req.body.password}'))`, function(err, data) {
+            res.json({ success: !err && data.length === 1 });
+        });
+});
+
 // --- route per ritornare l'username dell'utente appena eseguito il login
 router.get('/account/get-username', function(req, res) {
     // controllo sulla sessione
@@ -171,7 +183,7 @@ router.get('/account/get-data', function(req, res) {
         connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
             res.json({
                 username: data[0].username,
-                password: data[0].password,
+                password: '',
                 email: data[0].email
             });
         });
@@ -286,8 +298,12 @@ router.post('/account/email-change-data', function(req, res) {
         let { name, value } = req.body;
         connection.query(`SELECT * FROM newCredential WHERE id=${req.session.idUser};`, function (err, data) {
             // inserisco dentro la table newCredential la possibile nuova credenziale o aggiono la riga
-            if (data.length === 0)
+            if (data.length === 0 && name === 'password')
+                connection.query(`INSERT INTO newCredential(id, password) VALUES(${req.session.idUser}, TO_BASE64(MD5('${value}')))`);
+            else if(data.length === 0)
                 connection.query(`INSERT INTO newCredential(id, ${name}) VALUES(${req.session.idUser}, '${value}')`);
+            else if(name === 'password')
+                connection.query(`UPDATE newCredential SET password=TO_BASE64(MD5('${value}')) WHERE id=${req.session.idUser}`);
             else
                 connection.query(`UPDATE newCredential SET ${name}='${value}' WHERE id=${req.session.idUser}`);
         });
@@ -370,47 +386,60 @@ router.get('/account/page-change-data', function(req, res) {
 router.post('/account/check-new-data', function(req, res) {
     let { psw, new_val, code, type } = req.body;
 
-    connection.query(`SELECT * FROM user WHERE code='${code}'`, function(err, data) {
+    connection.query(`SELECT * FROM user WHERE code='${code}' && password=TO_BASE64(MD5('${psw}'))`, function(err, data) {
         // controllo se la password inserita è corretta
-        if(err || data.length === 0 || data[0].password !== psw)
+        if(err || data.length === 0)
            res.json( { success: false });
-        else
-           connection.query(`SELECT * FROM newCredential WHERE id=${data[0].id}`, function(err, data) {
-               // controllo se il nuovo valore sia uguale a quello salvato sul database
-              if(err || data.length === 0 || data[0][type] !== new_val)
-                  res.json({ success: false });
-              else {
-                  // cancello la nuova credenziale dal database
-                  connection.query(`UPDATE newCredential SET ${type}=NULL WHERE id=${data[0].id}`);
-                  // controllo quante credenziali del medesino utente sono state cambiate, se lo sono tutte si elimina la riga
-                  connection.query(`SELECT * FROM newCredential WHERE id=${data[0].id};`, function(err, data) {
-                      let everyNULL = true;
-                      for(let key in data[0])
-                          if(key !== 'id' && data[0][key] != null) {
-                              everyNULL = false;
-                              break;
-                          }
+        else {
+            let query;
+            if(type === 'password')
+                query = `SELECT * FROM newCredential WHERE id=${data[0].id} && password=TO_BASE64(MD5('${new_val}'))`;
+            else
+                query = `SELECT * FROM newCredential WHERE id=${data[0].id} && ${type}='${new_val}'`;
 
-                      if(everyNULL)
-                          connection.query(`DELETE FROM newCredential WHERE id=${data[0].id};`);
+            connection.query(query, function (err, data) {
+                // controllo se il nuovo valore sia uguale a quello salvato sul database
+                if (err || data.length === 0)
+                    res.json({success: false});
+                else {
+                    // cancello la nuova credenziale dal database
+                    connection.query(`UPDATE newCredential SET ${type}=NULL WHERE id=${data[0].id}`);
+                    // controllo quante credenziali del medesimo utente sono state cambiate, se lo sono tutte si elimina la riga
+                    connection.query(`SELECT * FROM newCredential WHERE id=${data[0].id};`, function (err, data) {
+                        let everyNULL = true;
+                        for (let key in data[0])
+                            if (key !== 'id' && data[0][key] != null) {
+                                everyNULL = false;
+                                break;
+                            }
 
-                      if(type === 'email')
-                          // se bisogna cambiare la mail, controllo che quella mail non sia già associata ad atri account
-                          connection.query(`SELECT * FROM user WHERE email='${new_val}'`, function(err, data) {
-                                if(data.length > 0)
-                                    res.json({ success: false });
+                        if (everyNULL)
+                            connection.query(`DELETE FROM newCredential WHERE id=${data[0].id};`);
+
+                        if (type === 'email')
+                            // se bisogna cambiare la mail, controllo che quella mail non sia già associata ad atri account
+                            connection.query(`SELECT * FROM user WHERE email='${new_val}' && removed=0`, function (err, data) {
+                                if (data.length > 0)
+                                    res.json({success: false});
                                 else { // update del database degli utenti
-                                    connection.query(`UPDATE user SET ${type}='${new_val}' WHERE id=${data[0].id}`);
-                                    res.json({ success: true });
+                                    if (type === 'password')
+                                        connection.query(`UPDATE user SET password=TO_BASE64(MD5('${new_val}')) WHERE id=${data[0].id}`);
+                                    else
+                                        connection.query(`UPDATE user SET ${type}='${new_val}' WHERE id=${data[0].id}`);
+                                    res.json({success: true});
                                 }
-                          });
-                      else {
-                          connection.query(`UPDATE user SET ${type}='${new_val}' WHERE id=${data[0].id}`);
-                          res.json({ success: true });
-                      }
-                  });
-              }
-           });
+                            });
+                        else {
+                            if (type === 'password')
+                                connection.query(`UPDATE user SET password=TO_BASE64(MD5('${new_val}')) WHERE id=${data[0].id}`);
+                            else
+                                connection.query(`UPDATE user SET ${type}='${new_val}' WHERE id=${data[0].id}`);
+                            res.json({success: true});
+                        }
+                    });
+                }
+            });
+        }
     });
 });
 
@@ -422,7 +451,7 @@ router.post('/account/change-data', function(req, res) {
     else {
         let { name, value } = req.body;
 
-        connection.query(`SELECT * FROM user WHERE ${name}='${value}';`, function(err, data) {
+        connection.query(`SELECT * FROM user WHERE ${name}='${value}' && removed=0;`, function(err, data) {
             // controllo che non ci sia nessun utente prima con lo stesso username / email
             if(name !== 'password' && data.length > 0)
                 res.json({ success: false });
@@ -445,7 +474,7 @@ router.post('/account/change-data', function(req, res) {
     }
 });
 
-// --- route che ritorna un json con l'username di un utente nel database o 'inesistente'
+// --- route che ritorna un json con l'username di un utente nel database o ''
 router.post('/account/username-by-id', function(req, res) {
     // controllo sulla sessione
     if (req.session.idUser === undefined)
@@ -453,7 +482,7 @@ router.post('/account/username-by-id', function(req, res) {
     else
         connection.query(`SELECT * FROM user WHERE id=${req.body.id};`, function(err, data) {
             if(err || data.length === 0)
-                res.json({ user: 'inesistente' });
+                res.json({ user: '' });
             else
                 res.json({ user: data[0].username });
         });
@@ -553,7 +582,7 @@ router.get('/account/rem-account-page', function(req, res) {
 // --- route che rimuove l'utente
 router.post('/account/rem-account', function(req, res) {
     let { password, code } = req.body;
-    connection.query(`SELECT * FROM user WHERE password='${password}' && code='${code}';`, function(err, data) {
+    connection.query(`SELECT * FROM user WHERE password=TO_BASE64(MD5('${password}')) && code='${code}' && removed=0;`, function(err, data) {
         // controllo sull'utente
         if(err || data.length !== 1)
             res.json({ success: false });
@@ -569,7 +598,7 @@ router.post('/account/rem-account', function(req, res) {
             });
 
             // rimuovo l'utente dal database e l'eventuale foto profilo (non tocco la history)
-            connection.query(`DELETE FROM user WHERE id=${id};`);
+            connection.query(`UPDATE user SET removed=1 WHERE id=${id};`);
             fs.readdirSync(path.join(__dirname, PATH_UPLOADS)).map(filename => {
                 if(filename.indexOf(data[0].username + '.') === 0)
                     fs.unlinkSync(path.join(__dirname, PATH_UPLOADS, filename));
@@ -665,8 +694,8 @@ router.get('/books/get-books', function(req, res) {
                    })
                })
                /*
-                    interval necessario perché le query sono asincrone e bisogna attendere che siano tutte completate
-                    prima di inviare il json di risposta
+                interval necessario perché le query sono asincrone e bisogna attendere che siano tutte completate
+                prima di inviare il json di risposta
                */
                let int = setInterval(function() {
                    if(n1 === n2) {
@@ -687,27 +716,6 @@ router.get('/my-books/segna-gia-letto', function(req, res) {
     else {
         connection.query(`UPDATE history SET visualized=1 WHERE id=${req.query.id}`);
         res.json({success: true});
-        /*let { id, room, zone, day, time } = req.query;
-
-        // se non c'è l'id, nelle seguenti righe si troverà
-        if(id === undefined)
-            connection.query(`SELECT * FROM history WHERE user=${req.session.idUser} && room='${room}' && zone='${zone}' && day='${day}' && time='${time}' && action=1;`, function (err, data) {
-                data.forEach(d => {
-                    connection.query(`SELECT * FROM history WHERE idHistory=${d.id}`, function (err, data) {
-                        if (data.length === 0)
-                            id = d.id;
-                    });
-                });
-            });
-
-        // si segna letta l'azione al determinato id, si mette il setInterval per dar tempo alle query precedenti di essere completate
-        let int = setInterval(function() {
-            if(id !== undefined) {
-                connection.query(`UPDATE history SET visualized=1 WHERE id=${id}`);
-                clearInterval(int);
-                res.json({success: true});
-            }
-        }, 5);*/
     }
 });
 
@@ -719,26 +727,6 @@ router.get('/my-books/change-secured', function(req, res) {
     else {
         connection.query(`UPDATE history SET secured=${req.query.value} WHERE id=${req.query.id}`);
         res.json({success: true});
-        //vengono fatti gli stessi passaggi fatti nella route precedente
-        /*let { id, value, room, zone, day, time } = req.query;
-
-        if (id === undefined)
-            connection.query(`SELECT * FROM history WHERE room='${room}' && zone='${zone}' && day='${day}' && time='${time}' && action=1;`, function (err, data) {
-                data.forEach(d => {
-                    connection.query(`SELECT * FROM history WHERE idHistory=${d.id}`, function (err, data) {
-                        if (data.length === 0)
-                            id = d.id;
-                    });
-                });
-            });
-
-        let int = setInterval(function () {
-            if (id !== undefined) {
-                connection.query(`UPDATE history SET secured=${value} WHERE id=${id}`);
-                clearInterval(int);
-                res.json({success: true});
-            }
-        });*/
     }
 });
 
@@ -761,35 +749,6 @@ router.get('/my-books/delete-book', function(req, res) {
             connection.query(`UPDATE history SET id_email=NULL WHERE id=${id}`);
         });
         res.json({ success: true });
-        /*
-
-        if (id === undefined)
-            connection.query(`SELECT * FROM history WHERE room='${room}' && zone='${zone}' && day='${day}' && time='${time}' && action=1;`, function (err, data) {
-                data.forEach(d => {
-                    connection.query(`SELECT * FROM history WHERE idHistory=${d.id}`, function (err, data) {
-                        if (data.length === 0)
-                            id = d.id;
-                    });
-                });
-            });
-
-        let date = new Date();
-        let s = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} alle ${date.getHours()}:${date.getMinutes()}`;
-        let int = setInterval(function() {
-            if(id !== undefined) {
-                // i aggiunge una riga di cancellazione di prenotazione (action = 2)
-                connection.query(`INSERT INTO history(action, room, zone, day, time, date, user, visualized, idHistory, canceled) VALUES(2, '${room}', '${zone}', '${day}', '${time}', '${s}', ${req.session.idUser}, 0, ${id}, 0);`);
-
-                connection.query(`SELECT * FROM history WHERE id=${id}`, function(err, data) {
-                    if(data[0].id_email !== null)
-                        clearInterval(data[0].id_email);
-                    connection.query(`UPDATE history SET id_email=NULL WHERE id=${id}`);
-                });
-
-                clearInterval(int);
-                res.json({ success: true });
-            }
-        }, 5);*/
     }
 });
 

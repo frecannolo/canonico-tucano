@@ -25,7 +25,7 @@
           <mat-label>{{d.name}}</mat-label>
           <input #input matInput [value]="d.value" id="input-to-reduce" required [type]="d.type">
         </mat-form-field>
-        <p class="value" *ngIf="d.icon == 'edit'" (dblclick)="edit(d, input)">{{d.type == 'password'? getPasswd(d.value): d.value}}</p>
+        <p class="value" *ngIf="d.icon == 'edit'" (dblclick)="edit(d, input)">{{d.value == ''? 'non visibile': d.value}}</p>
       </div>
       <div class="icon-container">
         <button color="primary" (click)="editOrSave(d, input)" mat-icon-button><mat-icon>{{d.icon}}</mat-icon></button>

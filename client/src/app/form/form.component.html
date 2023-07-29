@@ -2,7 +2,7 @@
   <mat-card id="form-container">
     <mat-card-header>
       <div mat-card-avatar class="logo-image"></div>
-      <mat-card-title>{{isLogin? 'Accedi': 'Registrati'}}</mat-card-title>
+      <mat-card-title>{{isLogin? 'Accedi': 'Registrati'}}</mat-card-title> <!-- il titolo cambia se è in login o no -->
       <mat-card-subtitle><strong></strong>Per i servizi di Tucano</mat-card-subtitle>
     </mat-card-header>
 
@@ -13,11 +13,12 @@
         <mat-form-field>
           <mat-label>Username</mat-label>
           <input matInput [disabled]="onLoad" [formControl]="username">
+          <!-- gli errori sono visibili in base al tipo di errore -->
           <mat-error *ngIf="username.hasError('pattern') && !username.hasError('required') && !isLogin">L'username deve essere lungo almeno 3 caratteri e può includere lettere, numeri e _</mat-error>
           <mat-error *ngIf="username.hasError('required')">L'username è <strong>obbligatorio</strong></mat-error>
         </mat-form-field>
 
-        <mat-form-field *ngIf="!isLogin">
+        <mat-form-field *ngIf="!isLogin"> <!-- campo dell'email visibile sono in registrazione -->
           <mat-label>Email</mat-label>
           <input matInput type="text" [disabled]="onLoad" [formControl]="email">
           <mat-error *ngIf="email.hasError('email') && !email.hasError('required')">Please enter a valid email address</mat-error>
@@ -26,7 +27,7 @@
 
         <mat-form-field>
           <mat-label>Password</mat-label>
-          <input matInput [disabled]="onLoad" [formControl]="password" [type]="passwordHided? 'password' : 'text'">
+          <input matInput [disabled]="onLoad" [formControl]="password" [type]="passwordHided? 'password' : 'text'"> <!-- il tipo cambia se la password è visibile o no -->
           <button mat-icon-button matSuffix (click)="passwordHided = !passwordHided" [attr.aria-pressed]="passwordHided">
             <mat-icon>{{passwordHided ? 'visibility_off' : 'visibility'}}</mat-icon>
           </button>

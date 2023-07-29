@@ -8,7 +8,6 @@ import {UserService} from "./user.service";
 export class ChangeDataService {
   dialog: any;
   messages: any[] = [];
-  elementsToChange: any[] = [];
 
   constructor(public Dialog: MatDialog, public user: UserService) { }
 
@@ -16,9 +15,6 @@ export class ChangeDataService {
     this.messages = [];
 
     for(let el of data) {
-      if(el.name == 'username')
-        this.user.username = el.value;
-
       if (el.needEmail) {
         this.user.sendEmailChangeData(el.name, el.value).subscribe(res => {
           this.messages.push({
@@ -36,6 +32,9 @@ export class ChangeDataService {
             color: res.success? '#2ca62c': '#f44336',
             visible: true
           });
+
+          if(el.name == 'username' && res.success)
+            this.user.username = el.value;
         });
       }
     }

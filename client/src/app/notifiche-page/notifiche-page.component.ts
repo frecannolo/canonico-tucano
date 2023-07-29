@@ -25,8 +25,6 @@ export class NotifichePageComponent implements OnInit {
           return n;
         }
       });
-
-      this.history.events.forEach(ev => ev.visualized = 1);
     });
   }
 

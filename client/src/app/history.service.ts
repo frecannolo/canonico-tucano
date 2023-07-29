@@ -5,7 +5,6 @@ import {CalendarService} from "./calendar.service";
   providedIn: 'root'
 })
 export class HistoryService {
-  events: any[] = [];
   notifications: number = 0;
 
   constructor(public calendar: CalendarService) { }

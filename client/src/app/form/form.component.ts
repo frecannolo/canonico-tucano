@@ -66,7 +66,7 @@ export class FormComponent {
     this.user.signUp(this.username.getRawValue(), this.email.getRawValue(), this.password.getRawValue())
       .subscribe(res => {
         this.onLoad = false;
-        if(res.error != undefined) {
+        if(res.error != this.STR_NO_ERROR) {
           this.error = res.error;
           this.noErrorAtSignUp = false;
         } else

@@ -183,7 +183,6 @@ export class BooksRoomComponent implements OnInit {
           res.save.date = this.calendar.dateToString(this.calendar.stringToDate(d)) + ' ' + cong + ' ' + this.calendar.intToTime(this.calendar.timeToInt(t)); // per formattare la data
           this.books.push(res.save);
 
-          this.history.events.push(res.save);
           this.history.notifications ++;
         }
       });

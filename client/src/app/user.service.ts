@@ -40,6 +40,11 @@ export class UserService {
       }), 1000);
   }
 
+  // --- effettua e ritorna la request post per il controllo delle password
+  checkPassword(password: string): Observable<any> {
+    return this.http.post('/check-password', { password: password });
+  }
+
   // --- effettua e ritorna la request get http per sapere se l'utente è loggato e se ha la sessione attiva
   getLogged(): Observable<any> {
     return this.http.get('/logged');

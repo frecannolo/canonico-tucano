@@ -5,6 +5,7 @@
   </div>
 
   <div id="content">
+    <!-- input della passowrd -->
     <mat-form-field appearance="outline">
       <mat-label>Password</mat-label>
       <input matInput #password [type]="passwordHided? 'password': 'text'">
@@ -19,5 +20,6 @@
     <p *ngIf="error" id="error">La password non è corretta</p>
   </div>
 
+  <!-- barra di load -->
   <mat-progress-bar *ngIf="load" mode="indeterminate"></mat-progress-bar>
 </div>

@@ -1,12 +1,13 @@
-import {Component, HostListener, OnInit} from '@angular/core';
-import {UserService} from '../user.service';
-import {ConfirmComponent} from "../confirm/confirm.component";
-import {ChangeDataService} from "../changeData.service";
-import {HistoryService} from "../history.service";
-import {CalendarService} from "../calendar.service";
-import {PagesService} from "../pages.service";
+import { Component, HostListener, OnInit } from '@angular/core';
+import { UserService } from '../user.service';
+import { ConfirmComponent } from "../confirm/confirm.component";
+import { ChangeDataService } from "../changeData.service";
+import { HistoryService } from "../history.service";
+import { CalendarService } from "../calendar.service";
+import { PagesService } from "../pages.service";
 
 const DATA_TO_CONFIRM = ['email', 'password'];
+const VALUES_TO_HIDE = ['password'];
 const REGEX_PASSW: RegExp = /^(=?.*[A-Z])(?=.*[0-9])[a-zA-Z0-9!?]{8,}$/;
 const REGEX_USERN: RegExp = /^[a-zA-Z0-9_]{3,}$/;
 
@@ -39,7 +40,7 @@ export class AccountPageComponent implements OnInit {
       for(let key in res)
         this.data.push({
           name: key,
-          value: res[key],
+          value: VALUES_TO_HIDE.indexOf(key) > -1? '': res[key],
           needEmail: DATA_TO_CONFIRM.includes(key),
           icon: 'edit',
           type: key == 'username' ? 'text' : key,
@@ -134,6 +135,10 @@ export class AccountPageComponent implements OnInit {
         next: () => {
           this.cds.setMessages(changed);
           changed.forEach(c => this.startData[c.name] = c.value);
+          this.startData.username = this.user.username;
+          for(let d of this.data)
+            if(d.name == 'username')
+              d.value = this.user.username;
         }
       }
     });
@@ -148,7 +153,6 @@ export class AccountPageComponent implements OnInit {
       data: {
         next: () => {
           this.user.clearHistory().subscribe(() => {
-            this.hs.events = [];
             this.history = [];
             this.hs.notifications = 0;
             this.nPrenotazioni = 0;
@@ -156,15 +160,6 @@ export class AccountPageComponent implements OnInit {
         }
       }
     });
-  }
-
-  getPasswd(p: string): string {
-    let t = p.substring(2, p.length - 2);
-    let s = '';
-    for(let n = 0; n < t.length; n ++)
-      s += '*';
-
-    return p.split(t).join(s);
   }
 
   remAccount(): void {
