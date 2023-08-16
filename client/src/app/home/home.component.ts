@@ -23,7 +23,7 @@ export class HomeComponent implements OnInit {
   constructor(public user: UserService, public router: Router, public pages: PagesService,
               public cds: ChangeDataService, public history: HistoryService) { }
 
-  // --- funzione dell'interfaccia OnInit che si esegue immediatamente
+  // --- funzione dell'interfaccia OnInit che si esegue all'apertura del component
   ngOnInit(): void {
     // controllo se l'utente è loggato, se non lo è viene redirect-ato alla pagina di login
     this.user.getLogged().subscribe((res: any) => {
@@ -42,7 +42,7 @@ export class HomeComponent implements OnInit {
 
     // richiedo la history dell'utente per scoprirne il numero di notifiche non lette
     this.user.getHistory().subscribe(
-      res => this.history.notifications = res.history.filter((e: any) => !Boolean(e.visualized))
+      res => this.history.notifications = res.history.filter((e: any) => !Boolean(e.visualized)).length
     );
   }
 }

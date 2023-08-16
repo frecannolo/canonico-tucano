@@ -44,3 +44,16 @@ button {
   background-color: #ffd740;
   color: #673ab7;
 }
+
+#n-notif {
+  width: 24px;
+  height: 24px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: #673ab7;
+  color: #ffd740;
+  margin-right: 10px;
+}

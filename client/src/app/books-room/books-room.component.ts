@@ -1,8 +1,8 @@
 import {Component, HostListener, Input, OnInit} from '@angular/core';
 import {UserService} from '../user.service';
-import {CalendarService} from "../calendar.service";
-import {PagesService} from "../pages.service";
-import {HistoryService} from "../history.service";
+import {CalendarService} from '../calendar.service';
+import {PagesService} from '../pages.service';
+import {HistoryService} from '../history.service';
 
 @Component({
   selector: 'app-books-room',
@@ -10,13 +10,13 @@ import {HistoryService} from "../history.service";
   styleUrls: ['./books-room.component.css']
 })
 export class BooksRoomComponent implements OnInit {
-  readonly START: string = '12:00';
-  readonly FINISH: string = '21:00';
-  readonly GAP: string = '1:00';
-  readonly WIDTH_TO_CHANGE: number = 1000;
-  readonly START_DAY_OF_THE_WEEK: number = 1;
-  readonly DAYS: string[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-  readonly DAYS_TRANSLATED: any = {
+  readonly START: string = '12:00';                                                                         // stringa contenente l'ora di inizio prenotazione
+  readonly FINISH: string = '21:00';                                                                        // stringa contenente l'ora di fine prenotazione
+  readonly GAP: string = '1:00';                                                                            // stringa contenente il gap, ovvero la durata di un evento
+  readonly WIDTH_TO_CHANGE: number = 1000;                                                                  // number con la width per cambiare la dimensione del calendario
+  readonly START_DAY_OF_THE_WEEK: number = 1;                                                               // number con il giorno iniziale della settimana (0 = domenica, 1 = lunedì, 2 = martedì, ...)
+  readonly DAYS: string[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']; // string[] con tutti i giorni della settimana
+  readonly DAYS_TRANSLATED: any = {                                                                         // Object con i giorni della settimana tradotti
     monday: 'lunedì',
     tuesday: 'martedì',
     wednesday: 'mercoledì',
@@ -26,43 +26,61 @@ export class BooksRoomComponent implements OnInit {
     sunday: 'domenica'
   }
 
-  @Input() name: string = '';
-  @Input() zone: string = '';
+  @Input() name: string = '';     // variabile input (settabile con la dichiarazione del tag, es <tag input=val>) con il nome della stanza
+  @Input() zone: string = '';     // variabile input (settabile con la dichiarazione del tag, es <tag input=val>) con la zona della stanza
 
-  width: number = 1600;
-  hours: string[] = [];
-  startDate: Date = new Date();
-  days: any[] = [];
-  requests: any[] = [];
-  books: any[] = [];
+  width: number = 1600;           // width della finestra
+  hours: string[] = [];           // stringa contenente le ore per la prenotazione
+  startDate: Date = new Date();   // data iniziale settata al giorno attuale
+  days: any[] = [];               // giorni visibile sulla tabella
+  requests: any[] = [];           // array contenente tutte le richieste di prenotazione
+  books: any[] = [];              // array contenente tutte le prenotazioni a quella stanza
 
+  /*
+  accedo all'istanza pubblica di:
+    - UserService per effettuare le API necessarie
+    - HistoryService per settare il numero di notifiche
+    - CalendarService per utilizzare delle funzioni sulle date
+    - PageService per settare il component da vedere in base alla url
+  */
   constructor(public user: UserService, public calendar: CalendarService, public pages: PagesService, public history: HistoryService) {
+    // setto l'array hours inserendo i vari orari possibili
     let start = this.START, finish = false;
+    
+    // estraggo dalle stringhe le ore e i minuti del gap e dell'orario finale
     const [hg, mg] = this.GAP.split(':');
     const [HE, ME] = this.FINISH.split(':');
 
     while(!finish) {
+      // estraggo le ore e i minuti dalla variabile start
       let [hs, ms] = start.split(':');
 
+      // calcolo l'ora e il minuto della fine della prenotazione
       let me = parseInt(ms) + parseInt(mg);
       let he = (parseInt(hs) + parseInt(hg) + Math.floor(me / 60)) % 24;
       me = me % 60;
 
       finish = he * 100 + me >= parseInt(HE) * 100 + parseInt(ME);
       let end = finish? this.FINISH: `${this.calendar.itoa(he)}:${this.calendar.itoa(me)}`;
+      // inserisco l'orario e assegno start = end
       this.hours.push(`${start} - ${end}`);
       start = end;
     }
   }
 
+  // --- metodo dell'interfaccia OnInit che si esegue all'apertura del component
   ngOnInit(): void {
+    // setto le variabili pubbliche e gli array
     this.calendar.selected = { };
     this.calendar.content = 'calendar';
+    this.books = [];
     this.requests = [];
 
+    // richiedo le prenotazioni della specifica stanza
     this.user.getBooks(this.name, this.zone).subscribe(res => {
       this.books = res.data;
       this.books.forEach(b => {
+        // estraggo la data e l'ora per poterle riformatte
         let [day, cong, time] = b.date.split(' ');
         day = this.calendar.dateToString(this.calendar.stringToDate(day));
         time = this.calendar.intToTime(this.calendar.timeToInt(time));
@@ -73,12 +91,14 @@ export class BooksRoomComponent implements OnInit {
     });
   }
 
+  // --- metodo per settare le giornate visibili in base alla width del display
   set(d: Date = new Date()): void {
     this.width = window.innerWidth;
     this.startDate = this.width > this.WIDTH_TO_CHANGE? this.getFirstDayOfWeek(d): d;
     this.setDays();
   }
 
+  // --- metodo che setta le giornate visibili sulla tabella
   setDays(): void {
     this.days = [];
     for(let i = 0, d = new Date(this.startDate); i < (this.width > this.WIDTH_TO_CHANGE? 7: 1); i ++, d.setDate(d.getDate() + 1)) {
@@ -92,6 +112,7 @@ export class BooksRoomComponent implements OnInit {
     }
   }
 
+  // --- metodo che, data una data, ritorna il primo giorno della settimana
   getFirstDayOfWeek(d: Date): Date {
     let dayOfWeek = d.getDay();
     let ret: Date = new Date(d);
@@ -102,25 +123,30 @@ export class BooksRoomComponent implements OnInit {
     return ret;
   }
 
+  // --- metodo che cambia le giornate visibili sulla tabella quando si va avanti di un giorno / una settimana
   shiftRight(): void {
     this.startDate.setDate(this.startDate.getDate() + (this.width > this.WIDTH_TO_CHANGE? 7: 1));
     this.setDays();
   }
 
+  // --- metodo che cambia le giornate visibili sulla tabella quando si va indietro di un giorno / una settimana
   shiftLeft(): void {
     this.startDate.setDate(this.startDate.getDate() - (this.width > this.WIDTH_TO_CHANGE? 7: 1));
     this.setDays();
   }
 
+  // --- metodo che scrive la data sull'input mettendo nel corretto ordine giorno, mese e anno
   rewrite(input: HTMLInputElement): void {
     const [m, d, y] = input.value.split('/');
     input.value = d + '/' + m + '/' + y;
   }
 
+  // --- metodo che ritorna la lunghezza (il numero di chiavi) dell'oggetto this.calendar.selected
   lengthSelected(): number {
     return Object.keys(this.calendar.selected).length;
   }
 
+  // --- metodo che setta l'array requests al fine di completare il booking
   completeBooking(): void {
     this.requests = [];
 
@@ -164,8 +190,28 @@ export class BooksRoomComponent implements OnInit {
     this.calendar.content = 'end-book';
   }
 
+  // --- metodo che rimuove una possibile prenotazione dalla sub page delle conferma prenotazioni
   remove(el: any): void {
-    delete this.calendar.selected[el.day + ' ' + el.start + ' - ' + el.end];
+    const [hg, mg] = this.GAP.split(':');
+    let start = el.start, end = '', n = 0;
+    
+    // cerco tutte le key di calendar.selected relative alla prenotazione
+    do {
+      let [hs, ms] = start.split(':'); 
+      
+      let me = parseInt(ms) + parseInt(mg);
+      let he = (parseInt(hs) + parseInt(hg) + Math.floor(me / 60)) % 24;
+      me = me % 60;
+      
+      let end = `${this.calendar.itoa(he)}:${this.calendar.itoa(me)}`;
+      if(end == el.end)
+        n = 1;
+      
+      // rimuovo le ore da calendar.selected
+      delete this.calendar.selected[el.day + ' ' + start + ' - ' + end];
+      start = end;
+    } while(n < 1);
+    
     for(let i = this.requests.indexOf(el) + 1; i < this.requests.length; i ++)
       this.requests[i - 1] = this.requests[i];
     this.requests.pop();
@@ -174,6 +220,7 @@ export class BooksRoomComponent implements OnInit {
       this.calendar.content = 'calendar';
   }
 
+  // --- metodo per salvare una prenotazione nel database
   saveBook(el: any, inp: HTMLTextAreaElement): void {
     this.user.saveBook(this.name, this.zone, el.day, el.start + ' - ' + el.end, inp.value)
       .subscribe(res => {
@@ -188,6 +235,7 @@ export class BooksRoomComponent implements OnInit {
       });
   }
 
+  // --- ritorna una prenotazione specifica data data e orario o null se non esiste
   getBook(day: any, h: string): any {
     for(let b of this.books)
       if(b.day == day.day && this.H1_includes_H2(b.time, h))
@@ -195,6 +243,7 @@ export class BooksRoomComponent implements OnInit {
     return null;
   }
 
+  // --- metodo che india se un orario H2 è incluso nell'orario H1
   H1_includes_H2(h1: string, h2: string): boolean {
     let [h1s, h1e] = h1.split(' - ');
     let [h2s, h2e] = h2.split(' - ');
@@ -202,6 +251,7 @@ export class BooksRoomComponent implements OnInit {
     return this.calendar.timeToInt(h2s) >= this.calendar.timeToInt(h1s) && this.calendar.timeToInt(h2e) <= this.calendar.timeToInt(h1e);
   }
 
+  // --- funzione collegata all'evento di resize della pagina
   @HostListener('window:resize', ['$event'])
   resize(): void {
     this.set(this.startDate);

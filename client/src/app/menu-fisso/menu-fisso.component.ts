@@ -10,6 +10,12 @@ import { HistoryService } from '../history.service';
 })
 export class MenuFissoComponent {
 
+  /*
+  accedo all'istanza pubblica di:
+    - UserService per effettuare le API necessarie
+    - HistoryService per settare il numero di notifiche
+    - PageService per gestire la pagina e il component home
+  */
   constructor(public user: UserService, public pages: PagesService, public history: HistoryService) { }
 
   logout(): void {

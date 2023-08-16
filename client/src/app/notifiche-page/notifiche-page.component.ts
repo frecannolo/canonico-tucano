@@ -1,7 +1,7 @@
-import {Component, HostListener, OnInit} from '@angular/core';
-import {UserService} from "../user.service";
-import {HistoryService} from "../history.service";
-import {CalendarService} from "../calendar.service";
+import { Component, HostListener, OnInit } from '@angular/core';
+import { UserService } from '../user.service';
+import { HistoryService } from '../history.service';
+import { CalendarService } from '../calendar.service';
 
 @Component({
   selector: 'app-notifiche-page',
@@ -9,8 +9,12 @@ import {CalendarService} from "../calendar.service";
   styleUrls: ['./notifiche-page.component.css']
 })
 export class NotifichePageComponent implements OnInit {
-  notifications: any[] = [];
+  notifications: any[] = [];  // array con tutte le notifiche non visualizzate
 
+  /*
+    accedo alle istanze pubbliche di:
+    - UserService per effettuare le chiamate GET e POST al server
+ */
   constructor(public user: UserService, public history: HistoryService, public calendar: CalendarService) { }
 
   ngOnInit(): void {

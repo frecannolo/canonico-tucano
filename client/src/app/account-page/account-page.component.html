@@ -35,7 +35,7 @@
     </div>
 
     <div id="buttons">
-      <button mat-raised-button color="accent" [disabled]="buttonChangesDisabled()" (click)="open()"><mat-icon>published_with_changes</mat-icon>Salva le modifiche</button>
+      <button mat-raised-button color="accent" [disabled]="buttonChangesDisabled()" (click)="reqCambiaCampi()"><mat-icon>published_with_changes</mat-icon>Salva le modifiche</button>
       <button mat-raised-button color="warn" [disabled]="buttonChangesDisabled()" (click)="reset()"><mat-icon>restart_alt</mat-icon>Reset</button>
     </div>
 
@@ -63,9 +63,12 @@
 
   <div id="container-final-button">
     <button mat-raised-button color="warn" (click)="remAccount()"><mat-icon>delete_forever</mat-icon>Elimina account</button>
+    <p *ngIf="emailCancelAccountSended">È stata inviata una mail per cancellare l'account</p>
   </div>
 </div>
 
+
+<!-- sub page della cronologia -->
 <div id="history" *ngIf="historyOpened">
   <div id="header">
     <div id="void"></div>

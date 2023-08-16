@@ -172,8 +172,16 @@ mat-form-field, input {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
   margin-top: 55px;
   margin-bottom: 25px;
+  gap: 30px;
+}
+
+#container-final-button p {
+  color: black;
+  font-size: 16px;
+  letter-spacing: 0.08em;
 }
 
 #alerts {

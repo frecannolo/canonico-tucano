@@ -8,6 +8,7 @@
 
   <mat-divider></mat-divider>
 
+  <!-- div contenente il calendario della stanza in questione -->
   <div id="calendar" *ngIf="calendar.content == 'calendar'">
     <div id="inputs">
       <mat-form-field color="accent">
@@ -48,6 +49,7 @@
     </div>
   </div>
 
+  <!-- div con la sub-page di fine prenotazione dove si segna il motivo delle  -->
   <div *ngIf="calendar.content == 'end-book'" id="end-book">
     <div id="cards">
       <mat-card *ngFor="let req of requests">

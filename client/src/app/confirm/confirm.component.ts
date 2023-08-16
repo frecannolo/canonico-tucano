@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -21,7 +21,7 @@ import { UserService } from '../user.service';
     MatProgressBarModule,
   ]
 })
-export class ConfirmComponent implements OnInit {
+export class ConfirmComponent {
   passwordHided: boolean = true; // booleana per capire se la password è coperta (nell'input)
   error: boolean = false;        // booleana = true se c'è un errore
   load: boolean = false;         // booleana che gestisce la barra di load
@@ -33,10 +33,6 @@ export class ConfirmComponent implements OnInit {
     - UserService -> per leggere la password dell'user
    */
   constructor(@Inject(MAT_DIALOG_DATA) public data: any, public cds: ChangeDataService, public user: UserService) { }
-
-  ngOnInit(): void {
-    //this.user.getData().subscribe(res => this.password = res.password);
-  }
 
   confirm(val: string): void {
     this.load = true;

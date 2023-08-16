@@ -34,3 +34,11 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   align-items: center;
   justify-content: space-between;
 }
+
+#notifiche > .mdc-button__label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1 1 auto;
+}

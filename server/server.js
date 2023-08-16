@@ -9,7 +9,7 @@ let multiparty = require('connect-multiparty'); // richiedo il modulo node 'conn
 
 const PORT = 3000;                                                                      // porta del server
 const URL = 'http://localhost:' + PORT;                                                 // url del server + porta
-const NAME_DB = 'TUCANO_1';                                                             // nome del database
+const NAME_DB = 'TUCANO';                                                               // nome del database
 const USER_DB = 'cano';                                                                 // user per il database
 const PASSWORD_DB = 'cano';                                                             // password per il database
 const EMAIL = 'tucanomessages@gmail.com';                                               // email di Tucano
@@ -53,7 +53,7 @@ router.post('/login', function(req, res) {
     let { username, password } = req.body;
 
     // eseguo una query nel database l'utente
-    connection.query(`SELECT * FROM user WHERE username='${username}' && password=TO_BASE64(MD5('${password}')) && verified=1 && removed=0;`, function(err, data) {
+    connection.query(`SELECT id FROM user WHERE username='${username}' and password=TO_BASE64(MD5('${password}')) and verified=1 and removed=0;`, function(err, data) {
         if(data.length === 1) { // se la query ritorna uno e un solo elemento salvo un parametro idUser con l'id dell'utente al database
            req.session.idUser = data[0].id;
            res.json({ logged: true });
@@ -68,12 +68,12 @@ router.post('/sign-up', function(req, res) {
     let { username, email, password } = req.body;
 
     // controllo che l'username non sia già stato preso
-    connection.query(`SELECT * FROM user WHERE username='${username}' && removed=0;`, function(err, data) {
+    connection.query(`SELECT id FROM user WHERE username='${username}' and removed=0;`, function(err, data) {
         if(data.length > 0)
             res.json({ error: `L'username ${username} esiste già` });
-        else {
+        else
             // controllo che la mail non sia già associata ad un altro account
-            connection.query(`SELECT * FROM user WHERE email='${email}' && removed=0;`, function(err, data) {
+            connection.query(`SELECT id FROM user WHERE email='${email}' and removed=0;`, function(err, data) {
                 if(data.length > 0)
                     res.json({ error: 'Hai già un account con questa mail' });
                 else {
@@ -115,7 +115,6 @@ router.post('/sign-up', function(req, res) {
                     });
                 }
             });
-        }
     });
 });
 
@@ -124,7 +123,7 @@ router.get('/checkCode', function(req, res) {
     let code = req.query.code;
     let filename;
 
-    connection.query(`SELECT * FROM user WHERE code='${code}' && verified=0 && removed=0;`, function (err, data) {
+    connection.query(`SELECT * FROM user WHERE code='${code}' and verified=0 and removed=0;`, function (err, data) {
         /*
             controllo che ci sia un'account non verificato con il codice passato come parametro, in base al numero di
             risultati scelgo il file da far visualizzare all'utente e segno l'account come verificato
@@ -158,7 +157,7 @@ router.post('/check-password', function(req, res) {
     if(req.session.idUser === undefined)
         res.json({ });
     else
-        connection.query(`SELECT * FROM user WHERE id=${req.session.idUser} && password=TO_BASE64(MD5('${req.body.password}'))`, function(err, data) {
+        connection.query(`SELECT id FROM user WHERE id=${req.session.idUser} and password=TO_BASE64(MD5('${req.body.password}'))`, function(err, data) {
             res.json({ success: !err && data.length === 1 });
         });
 });
@@ -169,7 +168,7 @@ router.get('/account/get-username', function(req, res) {
     if(req.session.idUser === undefined)
         res.json({ });
     else
-        connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
+        connection.query(`SELECT username FROM user WHERE id=${req.session.idUser};`, function(err, data) {
             res.json({ username: data[0].username });
         });
 });
@@ -180,7 +179,7 @@ router.get('/account/get-data', function(req, res) {
     if(req.session.idUser === undefined)
         res.json({ });
     else
-        connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
+        connection.query(`SELECT username, email FROM user WHERE id=${req.session.idUser};`, function(err, data) {
             res.json({
                 username: data[0].username,
                 password: '',
@@ -199,12 +198,12 @@ router.post('/account/new-photo', multipart, function(req, res) {
         // prendo l'estensione del file
         let ext = file.type.substring(file.type.indexOf('/') + 1);
 
-        connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
+        connection.query(`SELECT username FROM user WHERE id=${req.session.idUser};`, function(err, data) {
             let username = data[0].username;
             // rinomino il file in 'username'.'estensione'
             fs.renameSync(file.path, path.join(PATH_UPLOADS, username + '.' + ext));
 
-            // leggo la cartella degli uploads per elimiminare eventiali foto vecchie rimeste lì perché hanno un'estensione diversa
+            // leggo la cartella degli uploads per eliminare eventuali foto vecchie rimaste lì perché hanno un'estensione diversa
             fs.readdirSync(path.join(__dirname, PATH_UPLOADS)).map(filename => {
                 if(filename.indexOf(username) === 0 && filename !== username + '.' + ext)
                     fs.unlinkSync(path.join(__dirname, PATH_UPLOADS, filename));
@@ -221,7 +220,7 @@ router.get('/account/get-photo', function(req, res) {
     if(req.session.idUser === undefined)
         res.json({ });
     else
-        connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
+        connection.query(`SELECT username FROM user WHERE id=${req.session.idUser};`, function(err, data) {
             let username = data[0].username;
             // leggo i file nella cartella fino a quando non trovo quello che va bene
             fs.readdirSync(path.join(__dirname, PATH_UPLOADS)).map(filename => {
@@ -237,7 +236,7 @@ router.get('/account/src-photo', function(req, res) {
     if(req.session.idUser === undefined)
         res.json({ });
     else
-        connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
+        connection.query(`SELECT username FROM user WHERE id=${req.session.idUser};`, function(err, data) {
             let username = data[0].username;
             // leggo la cartella con le foto
             fs.readdir(path.join(__dirname, PATH_UPLOADS), function(err, files) {
@@ -266,7 +265,7 @@ router.get('/account/rem-photo', function(req, res) {
     if(req.session.idUser === undefined)
         res.json({ });
     else
-        connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function(err, data) {
+        connection.query(`SELECT username FROM user WHERE id=${req.session.idUser};`, function(err, data) {
             let username = data[0].username;
             let founded = null;
 
@@ -296,7 +295,7 @@ router.post('/account/email-change-data', function(req, res) {
         res.json({ });
     else {
         let { name, value } = req.body;
-        connection.query(`SELECT * FROM newCredential WHERE id=${req.session.idUser};`, function (err, data) {
+        connection.query(`SELECT id FROM newCredential WHERE id=${req.session.idUser};`, function (err, data) {
             // inserisco dentro la table newCredential la possibile nuova credenziale o aggiono la riga
             if (data.length === 0 && name === 'password')
                 connection.query(`INSERT INTO newCredential(id, password) VALUES(${req.session.idUser}, TO_BASE64(MD5('${value}')))`);
@@ -308,9 +307,9 @@ router.post('/account/email-change-data', function(req, res) {
                 connection.query(`UPDATE newCredential SET ${name}='${value}' WHERE id=${req.session.idUser}`);
         });
 
-        connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function (err, data) {
+        connection.query(`SELECT email, code FROM user WHERE id=${req.session.idUser};`, function (err, data) {
             if (err)
-                res.json({success: false});
+                res.json({ success: false });
 
             // preparo l'invio la mail
             const code = data[0].code;
@@ -354,7 +353,7 @@ router.get('/account/page-change-data', function(req, res) {
     // name è il nome del campo da modificare
     let {name, code} = req.query;
 
-    connection.query(`SELECT * FROM user WHERE code='${code}';`, function (err, data) {
+    connection.query(`SELECT id FROM user WHERE code='${code}';`, function (err, data) {
         // controllo sull'accesso della pagina
         if (err || data.length === 0)
             res.send('Non puoi accedere a questa pagina');
@@ -386,16 +385,16 @@ router.get('/account/page-change-data', function(req, res) {
 router.post('/account/check-new-data', function(req, res) {
     let { psw, new_val, code, type } = req.body;
 
-    connection.query(`SELECT * FROM user WHERE code='${code}' && password=TO_BASE64(MD5('${psw}'))`, function(err, data) {
+    connection.query(`SELECT id FROM user WHERE code='${code}' and password=TO_BASE64(MD5('${psw}'))`, function(err, data) {
         // controllo se la password inserita è corretta
         if(err || data.length === 0)
            res.json( { success: false });
         else {
             let query;
             if(type === 'password')
-                query = `SELECT * FROM newCredential WHERE id=${data[0].id} && password=TO_BASE64(MD5('${new_val}'))`;
+                query = `SELECT id FROM newCredential WHERE id=${data[0].id} and password=TO_BASE64(MD5('${new_val}'))`;
             else
-                query = `SELECT * FROM newCredential WHERE id=${data[0].id} && ${type}='${new_val}'`;
+                query = `SELECT di FROM newCredential WHERE id=${data[0].id} and ${type}='${new_val}'`;
 
             connection.query(query, function (err, data) {
                 // controllo se il nuovo valore sia uguale a quello salvato sul database
@@ -418,9 +417,9 @@ router.post('/account/check-new-data', function(req, res) {
 
                         if (type === 'email')
                             // se bisogna cambiare la mail, controllo che quella mail non sia già associata ad atri account
-                            connection.query(`SELECT * FROM user WHERE email='${new_val}' && removed=0`, function (err, data) {
+                            connection.query(`SELECT id FROM user WHERE email='${new_val}' and removed=0`, function (err, data) {
                                 if (data.length > 0)
-                                    res.json({success: false});
+                                    res.json({ success: false });
                                 else { // update del database degli utenti
                                     if (type === 'password')
                                         connection.query(`UPDATE user SET password=TO_BASE64(MD5('${new_val}')) WHERE id=${data[0].id}`);
@@ -451,13 +450,13 @@ router.post('/account/change-data', function(req, res) {
     else {
         let { name, value } = req.body;
 
-        connection.query(`SELECT * FROM user WHERE ${name}='${value}' && removed=0;`, function(err, data) {
+        connection.query(`SELECT id FROM user WHERE ${name}='${value}' and removed=0;`, function(err, data) {
             // controllo che non ci sia nessun utente prima con lo stesso username / email
             if(name !== 'password' && data.length > 0)
                 res.json({ success: false });
             else
-                connection.query(`SELECT * FROM user WHERE id=${req.session.idUser};`, function (err, data) {
-                    // cambio il nome dell'imagine di profilo (se ne ha una)
+                connection.query(`SELECT username FROM user WHERE id=${req.session.idUser};`, function (err, data) {
+                    // cambio il nome dell'immagine di profilo (se ne ha una)
                     if (name === 'username')
                         fs.readdirSync(path.join(__dirname, PATH_UPLOADS)).map(filename => {
                             if (filename.indexOf(data[0].username + '.') === 0) {
@@ -480,7 +479,7 @@ router.post('/account/username-by-id', function(req, res) {
     if (req.session.idUser === undefined)
         res.json({ });
     else
-        connection.query(`SELECT * FROM user WHERE id=${req.body.id};`, function(err, data) {
+        connection.query(`SELECT username FROM user WHERE id=${req.body.id};`, function(err, data) {
             if(err || data.length === 0)
                 res.json({ user: '' });
             else
@@ -488,18 +487,18 @@ router.post('/account/username-by-id', function(req, res) {
         });
 });
 
-// --- route che ritorna un json con un'array con tutta la history visibile dall'utente
+// --- route che ritorna un json con un array con tutta la history visibile dall'utente
 router.get('/account/get-history', function(req, res) {
     // controllo sulla sessione
     if (req.session.idUser === undefined)
         res.json({ });
     else
-        connection.query(`SELECT * FROM history WHERE user=${req.session.idUser};`, function(err, data) {
+        connection.query(`SELECT * FROM history WHERE user=${req.session.idUser} and canceled=0;`, function(err, data) {
             if(err)
                 res.json({ history: [] });
             else
                 // ritorno solo quelli non cancellati in precedenza
-                res.json({ history: data.filter(d => !Boolean(d.canceled)) });
+                res.json({ history: data });
         });
 });
 
@@ -510,13 +509,13 @@ router.get('/account/clear-history', function(req, res) {
         res.json({ });
     else
         // faccio la ricerca sulle operazioni di annullamento di prenotazione
-        connection.query(`SELECT * FROM history WHERE user=${req.session.idUser} && action=2`, function(err, data) {
-            // cancello tutte lee oprazioni di annullamento e le oeperazioni di prenotazione collegate ad esse
+        connection.query(`SELECT idHistory FROM history WHERE user=${req.session.idUser} and action=2`, function(err, data) {
+            // cancello tutte lee operazioni di annullamento e le operazioni di prenotazione collegate a esse
             data.forEach(d => connection.query(`DELETE FROM history WHERE id=${d.idHistory}`));
-            connection.query(`DELETE FROM history WHERE user=${req.session.idUser} && action=2`);
+            connection.query(`DELETE FROM history WHERE user=${req.session.idUser} and action=2`);
 
             // update della cronologia settando canceled = 1 alle operazioni rimaste
-            connection.query(`UPDATE history SET canceled=1 WHERE user=${req.session.idUser} && action=1`);
+            connection.query(`UPDATE history SET canceled=1 WHERE user=${req.session.idUser} and action=1`);
             res.json({ success: true });
         });
 });
@@ -526,8 +525,8 @@ router.post('/account/email-rem-account', function(req, res) {
     // controllo sulla sessione
     if (req.session.idUser === undefined)
         res.json({ });
-    else {
-        connection.query(`SELECT * FROM user WHERE id=${req.session.idUser}`, function(err, data) {
+    else
+        connection.query(`SELECT code, email FROM user WHERE id=${req.session.idUser}`, function(err, data) {
             if(err || data.length !== 1)
                 res.json({ });
             else {
@@ -563,13 +562,12 @@ router.post('/account/email-rem-account', function(req, res) {
                     res.json({ success: true });
                 });
             }
-        })
-    }
+        });
 });
 
 // --- route che fa visualizzare all'utente la pagina web per rimuovere l'account
 router.get('/account/rem-account-page', function(req, res) {
-    connection.query(`SELECT * FROM user WHERE code='${req.query.code}';`, function(err, data) {
+    connection.query(`SELECT id FROM user WHERE code='${req.query.code}';`, function(err, data) {
         // controlli sull'accesso
         if(err || data.length !== 1)
             res.send('non puoi accedere a questo url');
@@ -582,7 +580,7 @@ router.get('/account/rem-account-page', function(req, res) {
 // --- route che rimuove l'utente
 router.post('/account/rem-account', function(req, res) {
     let { password, code } = req.body;
-    connection.query(`SELECT * FROM user WHERE password=TO_BASE64(MD5('${password}')) && code='${code}' && removed=0;`, function(err, data) {
+    connection.query(`SELECT id FROM user WHERE password=TO_BASE64(MD5('${password}')) and code='${code}' and removed=0;`, function(err, data) {
         // controllo sull'utente
         if(err || data.length !== 1)
             res.json({ success: false });
@@ -590,7 +588,7 @@ router.post('/account/rem-account', function(req, res) {
             let id = data[0].id;
             // elimino le possibili nuove credenziali e annullo l'invio delle mail di notifica
             connection.query(`DELETE FROM newCredential WHERE id=${id};`);
-            connection.query('SELECT * FROM history WHERE user=${id};', function(err, data) {
+            connection.query('SELECT id_email FROM history WHERE user=${id};', function(err, data) {
                 if(!err)
                     for(let d of data)
                         if(d.id_email !== null)
@@ -611,7 +609,7 @@ router.post('/account/rem-account', function(req, res) {
     });
 });
 
-// --- route che ritorna json con un'array con tutte le stanze e le caratteristiche di ognuna di esse
+// --- route che ritorna json con un array con tutte le stanze e le caratteristiche di ognuna di esse
 router.post('/books/get-rooms', function(req, res) {
     // controllo sulla sessione
     if(req.session.idUser === undefined)
@@ -680,7 +678,7 @@ router.get('/books/get-books', function(req, res) {
         res.json({ });
     else {
         const { name, zone } = req.query;
-        connection.query(`SELECT * FROM history WHERE room='${name}' && zone='${zone}' && action=1;`, function(err, data) {
+        connection.query(`SELECT * FROM history WHERE room='${name}' and zone='${zone}' and action=1;`, function(err, data) {
            if(err)
                res.json({ data: [] });
            else {
@@ -691,7 +689,7 @@ router.get('/books/get-books', function(req, res) {
                        if(!err && data.length === 0)
                            toRet.push(d);
                        n1 ++;
-                   })
+                   });
                })
                /*
                 interval necessario perché le query sono asincrone e bisogna attendere che siano tutte completate
@@ -743,7 +741,7 @@ router.get('/my-books/delete-book', function(req, res) {
         let s = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} alle ${date.getHours()}:${date.getMinutes()}`;
         connection.query(`INSERT INTO history(action, room, zone, day, time, date, user, visualized, idHistory, canceled) VALUES(2, '${room}', '${zone}', '${day}', '${time}', '${s}', ${req.session.idUser}, 0, ${id}, 0);`);
 
-        connection.query(`SELECT * FROM history WHERE id=${id}`, function(err, data) {
+        connection.query(`SELECT id_email FROM history WHERE id=${id}`, function(err, data) {
             if(data[0].id_email !== null)
                 clearInterval(data[0].id_email);
             connection.query(`UPDATE history SET id_email=NULL WHERE id=${id}`);
@@ -773,7 +771,7 @@ router.get('/my-books/set-email', function(req, res) {
 
         connection.query(`UPDATE history SET time_email='${time}' WHERE id=${id}`, function() {
            connection.query(`SELECT * FROM history WHERE id=${id}`, function(err, data) {
-               // pulisce un'eventuale intervallo precedente
+               // pulisce un eventuale intervallo precedente
                if(data[0].id_email != null)
                    clearInterval(data[0].id_email);
 
