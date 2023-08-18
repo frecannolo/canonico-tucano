@@ -3,7 +3,7 @@ import { UserService } from '../user.service';
 import { Router } from '@angular/router';
 import { PagesService } from '../pages.service';
 import { ChangeDataService } from '../changeData.service';
-import { HistoryService } from '../history.service';
+import { NotificationsService } from '../notifications.service';
 
 @Component({
   selector: 'app-home',
@@ -21,7 +21,7 @@ export class HomeComponent implements OnInit {
     - history per settare il numero di notifiche
   */
   constructor(public user: UserService, public router: Router, public pages: PagesService,
-              public cds: ChangeDataService, public history: HistoryService) { }
+              public cds: ChangeDataService, public history: NotificationsService) { }
 
   // --- funzione dell'interfaccia OnInit che si esegue all'apertura del component
   ngOnInit(): void {

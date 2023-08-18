@@ -2,7 +2,7 @@ import {Component, HostListener, Input, OnInit} from '@angular/core';
 import {UserService} from '../user.service';
 import {CalendarService} from '../calendar.service';
 import {PagesService} from '../pages.service';
-import {HistoryService} from '../history.service';
+import {NotificationsService} from '../notifications.service';
 
 @Component({
   selector: 'app-books-room',
@@ -43,10 +43,10 @@ export class BooksRoomComponent implements OnInit {
     - CalendarService per utilizzare delle funzioni sulle date
     - PageService per settare il component da vedere in base alla url
   */
-  constructor(public user: UserService, public calendar: CalendarService, public pages: PagesService, public history: HistoryService) {
+  constructor(public user: UserService, public calendar: CalendarService, public pages: PagesService, public history: NotificationsService) {
     // setto l'array hours inserendo i vari orari possibili
     let start = this.START, finish = false;
-    
+
     // estraggo dalle stringhe le ore e i minuti del gap e dell'orario finale
     const [hg, mg] = this.GAP.split(':');
     const [HE, ME] = this.FINISH.split(':');
@@ -80,7 +80,7 @@ export class BooksRoomComponent implements OnInit {
     this.user.getBooks(this.name, this.zone).subscribe(res => {
       this.books = res.data;
       this.books.forEach(b => {
-        // estraggo la data e l'ora per poterle riformatte
+        // estraggo la data e l'ora per poterle riformattare
         let [day, cong, time] = b.date.split(' ');
         day = this.calendar.dateToString(this.calendar.stringToDate(day));
         time = this.calendar.intToTime(this.calendar.timeToInt(time));
@@ -151,7 +151,7 @@ export class BooksRoomComponent implements OnInit {
     this.requests = [];
 
     Object.keys(this.calendar.selected).forEach(key => {
-      let [day, hSt, ignore, hEn] = key.split(' '); // ignore perché va ignorato in quanto inutile per l'algoritmo
+      let [day, hSt, , hEn] = key.split(' '); // ignore perché va ignorato in quanto inutile per l'algoritmo
       this.requests.push({
         day: this.calendar.dateToInt(this.calendar.stringToDate(day)),
         start: this.calendar.timeToInt(hSt),
@@ -190,28 +190,28 @@ export class BooksRoomComponent implements OnInit {
     this.calendar.content = 'end-book';
   }
 
-  // --- metodo che rimuove una possibile prenotazione dalla sub page delle conferma prenotazioni
+  // --- metodo che rimuove una possibile prenotazione dalla sub page della conferma prenotazioni
   remove(el: any): void {
     const [hg, mg] = this.GAP.split(':');
-    let start = el.start, end = '', n = 0;
-    
+    let start = el.start, n = 0;
+
     // cerco tutte le key di calendar.selected relative alla prenotazione
     do {
-      let [hs, ms] = start.split(':'); 
-      
+      let [hs, ms] = start.split(':');
+
       let me = parseInt(ms) + parseInt(mg);
       let he = (parseInt(hs) + parseInt(hg) + Math.floor(me / 60)) % 24;
       me = me % 60;
-      
+
       let end = `${this.calendar.itoa(he)}:${this.calendar.itoa(me)}`;
       if(end == el.end)
         n = 1;
-      
+
       // rimuovo le ore da calendar.selected
       delete this.calendar.selected[el.day + ' ' + start + ' - ' + end];
       start = end;
     } while(n < 1);
-    
+
     for(let i = this.requests.indexOf(el) + 1; i < this.requests.length; i ++)
       this.requests[i - 1] = this.requests[i];
     this.requests.pop();
@@ -235,7 +235,7 @@ export class BooksRoomComponent implements OnInit {
       });
   }
 
-  // --- ritorna una prenotazione specifica data data e orario o null se non esiste
+  // --- ritorna una prenotazione specifica data e orario o null se non esiste
   getBook(day: any, h: string): any {
     for(let b of this.books)
       if(b.day == day.day && this.H1_includes_H2(b.time, h))

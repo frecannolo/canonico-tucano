@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { UserService } from '../user.service';
 import { PagesService } from '../pages.service';
-import { HistoryService } from '../history.service';
+import { NotificationsService } from '../notifications.service';
 
 @Component({
   selector: 'app-menu-fisso',
@@ -16,7 +16,7 @@ export class MenuFissoComponent {
     - HistoryService per settare il numero di notifiche
     - PageService per gestire la pagina e il component home
   */
-  constructor(public user: UserService, public pages: PagesService, public history: HistoryService) { }
+  constructor(public user: UserService, public pages: PagesService, public history: NotificationsService) { }
 
   logout(): void {
     this.pages.load = true;

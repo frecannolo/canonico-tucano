@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import {CalendarService} from "./calendar.service";
+import {CalendarService} from './calendar.service';
 
 @Pipe({
   name: 'miePrenotazioni'

@@ -29,8 +29,8 @@ export class ConfirmComponent {
   /*
     accedo alle istanze pubbliche di:
     - @Inject(MAT_DIALOG_DATA) data -> i dati che vengono passati al dialog
-    - ChangeDateService -> per chiudere il dialogo
-    - UserService -> per leggere la password dell'user
+    - ChangeDateService -> per chiudere il dialog
+    - UserService -> per check-are la password dell'user
    */
   constructor(@Inject(MAT_DIALOG_DATA) public data: any, public cds: ChangeDataService, public user: UserService) { }
 

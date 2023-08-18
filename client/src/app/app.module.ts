@@ -61,7 +61,7 @@ import { VisNotificationsPipe } from './vis-notifications.pipe';
         BrowserModule,
         AppRoutingModule,
         BrowserAnimationsModule,
-        HttpClientModule, // module necessario per usare HttpCLient per effettuare le richieste http
+        HttpClientModule, // module necessario per usare HttpClient per effettuare le richieste http
         MatCardModule,
         MatListModule,
         FormsModule,

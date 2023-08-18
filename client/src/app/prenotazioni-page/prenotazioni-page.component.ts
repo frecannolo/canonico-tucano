@@ -1,10 +1,10 @@
-import {Component, OnInit} from '@angular/core';
-import {HistoryService} from "../history.service";
-import {UserService} from "../user.service";
-import {CalendarService} from "../calendar.service";
-import {ConfirmComponent} from "../confirm/confirm.component";
-import {ChangeDataService} from "../changeData.service";
-import {SetOraNotificaComponent} from "../set-ora-notifica/set-ora-notifica.component";
+import { Component, OnInit } from '@angular/core';
+import { NotificationsService } from '../notifications.service';
+import { UserService } from '../user.service';
+import { CalendarService } from '../calendar.service';
+import { ConfirmComponent } from '../confirm/confirm.component';
+import { ChangeDataService } from '../changeData.service';
+import { SetOraNotificaComponent } from '../set-ora-notifica/set-ora-notifica.component';
 
 @Component({
   selector: 'app-prenotazioni-page',
@@ -12,20 +12,28 @@ import {SetOraNotificaComponent} from "../set-ora-notifica/set-ora-notifica.comp
   styleUrls: ['./prenotazioni-page.component.css']
 })
 export class PrenotazioniPageComponent implements OnInit {
-  readonly OPTIONS: string[] = ['giorno', 'nome', 'zona'];
-  verso: string = 'downward';
-  value: string = this.OPTIONS[0];
-  iconSearch: string = 'search';
-  filter: string = '';
+  readonly OPTIONS: string[] = ['giorno', 'nome', 'zona'];    // array con l'elenco di tutte le opzioni per cui è possibile orinare le prenotazioni
+  verso: 'downward' | 'upward' = 'downward';                  // stringa con il verso della freccia di ordinamento (verso l'alto o il basso)
+  sortFor: string = this.OPTIONS[0];                          // opzione per ordinare le prenotazioni
+  filter: string = '';                                        // stringa del filter della ricerca per nome
 
-  history: any[] = [];
+  history: any[] = [];                                        // array con tutti le prenotazioni non ancora passate
 
-  constructor(public hs: HistoryService, public user: UserService, public calendar: CalendarService, public cds: ChangeDataService) { }
+  /*
+    accedo alle istanze pubbliche di:
+      - HistoryService per accedere al numero di notifiche
+      - UserService per effettuare richieste GET e POST al server
+      - CalendarService per utilizzare le funzioni sulle date
+      - ChangeDateService per accedere all'oggetto dialog
+  */
+  constructor(public hs: NotificationsService, public user: UserService, public calendar: CalendarService, public cds: ChangeDataService) { }
 
+  // --- metodo dell'interfaccia OnInit che si esegue all'apertura del component
   ngOnInit(): void {
     this.user.getHistory().subscribe(res => {
       this.history = res.history;
       this.history.filter(event => event.action == 2).forEach(event => {
+        //rimuovo tutti gli eventi che sono già stati cancellati
         for(let i = 0; i < this.history.length; i ++)
           if(event.idHistory == this.history[i].id) {
             for(let j = i + 1; j < this.history.length; j++)
@@ -33,19 +41,21 @@ export class PrenotazioniPageComponent implements OnInit {
             this.history.pop();
           }
       });
+      // tengo solo le prenotazioni e le riordino per data mantengo solo quelle non ancora passate
       this.history = this.history.filter(event => event.action == 1);
-      this.sort();
+      this.set();
     });
   }
 
-  sort(): void {
+  // --- metodo che setta e prepara l'array delle prenotazioni in base a sortFor
+  set(): void {
     let newArr: any[] = [];
     for(let v of this.history) {
-      if (this.calendar.dateToInt(this.calendar.stringToDate(v.day)) >= this.calendar.dateToInt(new Date()))
+      if (this.calendar.stringToDate(v.day) >= new Date())
         newArr.push(v);
     }
 
-    if(this.value == 'giorno')
+    if(this.sortFor == 'giorno')
       for(let i = 1; i < newArr.length; i ++)
         for(let j = 0; j < i; j ++) {
           let n_i = this.calendar.dateToInt(this.calendar.stringToDate(newArr[i].day));
@@ -58,7 +68,8 @@ export class PrenotazioniPageComponent implements OnInit {
           }
         }
     else {
-      let key = this.value == 'nome'? 'room': 'zone';
+      let key = this.sortFor == 'nome'? 'room': 'zone';
+      // riordino l'array in base al nome o alla zona della stanza
       newArr.sort((a: any, b: any) => a[key].localeCompare(b[key], undefined, { numeric: true, sensitivity: 'base' }));
       if(this.verso === 'upward')
         newArr.reverse();
@@ -78,6 +89,7 @@ export class PrenotazioniPageComponent implements OnInit {
     this.history = newArr;
   }
 
+  // --- metodo che segna come già letto la prenotazione el
   segnaGiaLetto(el: any): void {
     if(el.visualized == 0)
       this.user.segnaGiaLetto(el.id).subscribe(res => {
@@ -88,31 +100,36 @@ export class PrenotazioniPageComponent implements OnInit {
       });
   }
 
+  // --- metodo che apre la prenotazione e la segna come letta
   toggle(ev: any): void {
     this.segnaGiaLetto(ev);
     ev.opened = !ev.opened;
   }
 
+  // --- metodo che fissa la prenotazione el
   fissa(el: any): void {
     this.user.changeSecured(el.id, el.secured).subscribe(() => {
       el.secured = !el.secured;
-      this.sort();
+      this.set();
     });
   }
 
+  // --- metodo che cambia la freccia e setta nuovamente l'array di prenotazioni
   changeWard(): void {
     this.verso = this.verso == 'upward'? 'downward': 'upward';
-    this.sort();
+    this.set();
   }
 
-  changeValue(newValue: string): void {
-    if(this.value != newValue) {
-      this.value = newValue;
+  // --- metodo eseguito al cambio di sortFor
+  changeSortFor(newValue: string): void {
+    if(this.sortFor != newValue) {
+      this.sortFor = newValue;
       this.verso = 'downward';
-      this.sort();
+      this.set();
     }
   }
 
+  // --- metodo che elimina la prenotazione el del db e dall'array history
   delete(el: any): void {
     this.cds.dialog = this.cds.Dialog.open(ConfirmComponent, {
       data: {
@@ -122,11 +139,9 @@ export class PrenotazioniPageComponent implements OnInit {
             for(let i = ind + 1; i < this.history.length; i ++)
               this.history[i - 1] = this.history[i];
             this.history.pop();
-            this.sort();
+            this.set();
 
             this.hs.notifications ++; // notifica cancellazione evento
-            if(!el.visualized)
-              this.hs.notifications --;
           });
         }
       }
@@ -134,6 +149,7 @@ export class PrenotazioniPageComponent implements OnInit {
 
   }
 
+  // --- metodo che apre il dialog per settare l'anticipo della notifica
   open(ev: any): void {
     this.cds.dialog = this.cds.Dialog.open(SetOraNotificaComponent, {
       width: '500px',
@@ -144,6 +160,7 @@ export class PrenotazioniPageComponent implements OnInit {
     });
   }
 
+  // --- metodo che ritorna la stringa dell'anticipo
   getTimeEmail(s: string): string {
     let [d, h, m] = s.split(' ');
     return `${parseInt(d) == 0? '': parseInt(d) == 1? '1 giorno ': d + ' giorni '}${parseInt(h) == 0? '': parseInt(h) == 1? '1 ora ': h + ' ore '}${parseInt(m) == 0? '': parseInt(m) == 1? '1 minuto': m + ' minuti'}`;

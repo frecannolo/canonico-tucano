@@ -8,18 +8,25 @@ import { PagesService } from "../pages.service";
   styleUrls: ['./prenota-page.component.css']
 })
 export class PrenotaPageComponent implements OnInit {
-  iconSearch: string = 'search';
-  zones: any[] = [];
-  rooms: any[] = [];
-  filter: string = '';
+  iconSearch: 'search' | 'close' = 'search';  // icona della ricerca dall'input della stanza
+  zones: any[] = [];                          // array delle zone delle stanze
+  rooms: any[] = [];                          // array delle varie stanze di prenotazione
+  filter: string = '';                        // filter della ricerca
 
-  roomName: string = '';
-  roomZone: string = '';
+  roomName: string = '';                      // nome della stanza aperta
+  roomZone: string = '';                      // zona della stanza aperta
 
+  /*
+    accedo alle istanze pubbliche di:
+      - UserService per effettuare richieste GET e POST al server
+      - PagesService per cambiare component alla scelta della stanza
+  */
   constructor(public user: UserService, public pages: PagesService) { }
 
+  // --- metodo dell'interfaccia OnInit che si esegue all'apertura del component
   ngOnInit(): void {
     this.pages.divInSearch = 'div-1';
+    // richiedo le stanze e le catalogo in base alla loro zona
     this.user.getRooms().subscribe(res => {
       res.rooms.forEach((d: any): void => {
         let i = -1;
@@ -40,10 +47,12 @@ export class PrenotaPageComponent implements OnInit {
     });
   }
 
+  // --- metodo che cambia l'icona della ricerca
   changeIcon(input: HTMLInputElement): void {
       this.iconSearch = input.value.trim() != ''? 'close' : 'search';
   }
 
+  // --- metodo che cancella l'input, cambia l'icona e azzera il filter
   cancel(input: HTMLInputElement): void {
     if (this.iconSearch == 'close') {
       input.value = '';
@@ -52,6 +61,7 @@ export class PrenotaPageComponent implements OnInit {
     }
   }
 
+  // --- metodo che apre la page della stanza
   open(name: string, zone: string): void {
     this.pages.divInSearch = 'div-2';
     this.roomName = name;

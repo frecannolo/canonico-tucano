@@ -2,7 +2,7 @@ import { Component, HostListener, OnInit } from '@angular/core';
 import { UserService } from '../user.service';
 import { ConfirmComponent } from '../confirm/confirm.component';
 import { ChangeDataService } from '../changeData.service';
-import { HistoryService } from '../history.service';
+import { NotificationsService } from '../notifications.service';
 import { CalendarService } from '../calendar.service';
 import { PagesService } from '../pages.service';
 
@@ -15,6 +15,12 @@ const VALUES_TO_HIDE: string[] = ['password'];                            // con
   styleUrls: ['./account-page.component.css']
 })
 export class AccountPageComponent implements OnInit {
+  readonly regexes: any = {                                 // oggetto con le regex dei vari campi
+    email: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
+    password: /^(=?.*[A-Z])(?=.*[0-9])[a-zA-Z0-9!?]{8,}$/,
+    username: /^[a-zA-Z0-9_]{3,}$/
+  }
+
   data: any[] = [];                                         // array con tutti i dati cambiabili dall'utente
   startData: any;                                           // oggetto con tutti i valori iniziali dei dati dell'utente
   notImageInserted: boolean = false;                        // boolean che indica se il file inserito è un'immagine
@@ -22,12 +28,6 @@ export class AccountPageComponent implements OnInit {
   historyOpened: boolean = false;                           // boolean che indica se la sub-pagina della cronologia è aperta
   history: any[] = [];                                      // array di oggetti con tutti le azioni della cronologia
   emailCancelAccountSended: boolean = false;                // boolean che visualizza un messaggio se la mail è stata inviata
-
-  regexes: any = {                                          // oggetto con le regex dei vari campi
-    email: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
-    password: /^(=?.*[A-Z])(?=.*[0-9])[a-zA-Z0-9!?]{8,}$/,
-    username: /^[a-zA-Z0-9_]{3,}$/
-  }
 
   /*
   accedo all'istanza pubblica di:
@@ -37,7 +37,7 @@ export class AccountPageComponent implements OnInit {
     - CalendarService per utilizzare delle funzioni sulle date
     - PageService per gestire la pagina e il component home
   */
-  constructor(public user: UserService, public cds: ChangeDataService, public hs: HistoryService,
+  constructor(public user: UserService, public cds: ChangeDataService, public hs: NotificationsService,
               public calendar: CalendarService, public pages: PagesService) { }
 
   // --- metodo dell'interfaccia OnInit che si esegue all'apertura del component
@@ -69,7 +69,7 @@ export class AccountPageComponent implements OnInit {
   set(): void {
     this.history.forEach(ev => {
       ev.content1 = `${ev.action == 1 ? 'prenotazione' : 'cancellazione evento'} | stanza: ${ev.room}`;
-      ev.content2 = this.calendar.getCompleteDateFormatted(ev.date);
+      ev.content2 = this.calendar.getDate(ev.date);
       ev.iconToggle = 'event';
       ev.iconAndClass = ev.action == 1 ? 'done' : 'close';
     });

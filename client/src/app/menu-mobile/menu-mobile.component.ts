@@ -6,7 +6,7 @@ import {NgForOf, NgIf} from '@angular/common';
 import {PagesService} from '../pages.service';
 import {Router} from '@angular/router';
 import {UserService} from '../user.service';
-import {HistoryService} from '../history.service';
+import {NotificationsService} from '../notifications.service';
 
 // questo è un component speciale, è un MatDialog (un popup), di conseguenza la seguente annotation sarà diversa e l'oggetto MenuMobileComponent non sarà presente nell'app.module.ts
 @Component({
@@ -29,7 +29,7 @@ export class MenuMobileComponent {
     - HistoryService per settare il numero di notifiche
     - PageService per gestire la pagina e il component home
   */
-  constructor(public pages: PagesService, public router: Router, public user: UserService, public hs: HistoryService) { }
+  constructor(public pages: PagesService, public router: Router, public user: UserService, public hs: NotificationsService) { }
 
   close(name: string): void {
     this.pages.menuDialog.close();

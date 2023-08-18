@@ -5,14 +5,14 @@
     <mat-form-field appearance="outline" id="search">
       <mat-label>Cerca</mat-label>
       <input matInput [(ngModel)]="filter">
-      <mat-icon matSuffix>{{iconSearch}}</mat-icon>
+      <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
 
     <div>
       <mat-form-field>
         <mat-label>Ordina per</mat-label>
-        <mat-select disableRipple [value]="value">
-          <mat-option *ngFor="let opt of OPTIONS" [value]="opt" (click)="changeValue(opt)">{{opt}}</mat-option>
+        <mat-select disableRipple [value]="sortFor">
+          <mat-option *ngFor="let opt of OPTIONS" [value]="opt" (click)="changeSortFor(opt)">{{opt}}</mat-option>
         </mat-select>
       </mat-form-field>
       <button mat-icon-button (click)="changeWard()" id="up-down"><mat-icon>arrow_{{verso}}</mat-icon></button>

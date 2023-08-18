@@ -1,16 +1,23 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import {UserService} from "./user.service";
+import { UserService } from './user.service';
 
+// questo è un service, i component li utilizzano per comunicare tra loro perché accedono a essi tramite un'istanza pubblica
 @Injectable({
   providedIn: 'root'
 })
 export class ChangeDataService {
-  dialog: any;
-  messages: any[] = [];
+  dialog: any;            // dialog, durante la sessione può diventare uguale a un oggetto dialog del tipo ConfirmComponent o SetOraNotificaComponent
+  messages: any[] = [];   // array di Object dei messaggi da visualizzare in caso di cambio di credenziali
 
+  /*
+    accedo alle istanze pubbliche di:
+      - MatDialog per aprire i dialog
+      - UserService per richiede al server il cambio di credenziali
+  */
   constructor(public Dialog: MatDialog, public user: UserService) { }
 
+  // --- metodo che setta i messaggi da visualizzare e invia le richieste al server per il cambio di credenziali
   setMessages(data: any[]): void {
     this.messages = [];
 

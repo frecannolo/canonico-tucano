@@ -4,7 +4,7 @@ import {FormComponent} from './form/form.component';
 import {HomeComponent} from './home/home.component';
 
 /*
-  array di oggett Route, ogni oggetto può presentare una path (senza lo slash iniziale), il title (ovvero il title della pagina html),
+  array di oggetti Route, ogni oggetto può presentare una path (senza lo slash iniziale), il title (ovvero il title della pagina html),
   il component (il component da visualizzare a una determinata route) e redirectTo (specifica a quale route fare la redirect)
  */
 const routes: Routes = [
